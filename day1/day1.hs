@@ -17,7 +17,6 @@ solve :: [Int] -> Maybe Int
 solve = (uncurry (*) <$>) . findPair . sort
     where findPair :: [Int] -> Maybe (Int, Int)
           findPair []     = Nothing
-          findPair [_]    = Nothing
           findPair (x:xs) =   ((x,) <$> (head' . filter (== target - x)) xs)
                           <|> findPair xs
 
