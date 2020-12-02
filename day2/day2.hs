@@ -1,6 +1,7 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 
+import           Control.Monad      (forM_)
 import           Data.Either        (fromRight)
 import           Text.Parsec
 import           Text.Parsec.String (Parser)
@@ -36,6 +37,5 @@ check2 (Requirement x y c cs) =
 
 main :: IO ()
 main = do { input <- readFile "input"
-          ; print . solve check1 . lines $ input
-          ; print . solve check2 . lines $ input
+          ; forM_ [check1, check2] (\p -> print . solve p . lines $ input)
           }
