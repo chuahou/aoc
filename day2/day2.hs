@@ -25,10 +25,7 @@ check1 (low, high, c, cs) =
 
 check2 :: Requirement -> Bool
 check2 (x, y, c, cs) =
-    max x y <= length cs &&
-        let cx = cs !! (x - 1)
-            cy = cs !! (y - 1)
-         in (cx == c && cy /= c) || (cx /= c && cy == c)
+    max x y <= length cs && (cs !! (x - 1) == c) /= (cs !! (y - 1) == c)
 
 main :: IO ()
 main = do { input <- readFile "input"
