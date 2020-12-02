@@ -1,10 +1,9 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 
-import           Control.Monad      (forM_)
-import           Data.Either        (fromRight)
+import           Control.Monad (forM_)
+import           Data.Either   (fromRight)
 import           Text.Parsec
-import           Text.Parsec.String (Parser)
 
 data Requirement = Requirement { lowBound  :: Int
                                , highBound :: Int
@@ -15,7 +14,7 @@ data Requirement = Requirement { lowBound  :: Int
 solve :: (Requirement -> Bool) -> [String] -> Int
 solve p = length . filter (fromRight False . parse (p <$> lineP) "")
 
-lineP :: Parser Requirement
+lineP :: Parsec String () Requirement
 lineP = do { low  <- read <$> many1 digit <* char '-'
            ; high <- read <$> many1 digit <* space
            ; c    <- anyChar              <* string ": "
