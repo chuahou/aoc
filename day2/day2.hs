@@ -11,8 +11,8 @@ data Requirement = Requirement { lowBound  :: Int
                                , password  :: String
                                }
 
-solve1 :: [String] -> Int
-solve1 = length . filter (fromRight False . parse (checkPassword <$> lineP) "")
+solve :: (Requirement -> Bool) -> [String] -> Int
+solve p = length . filter (fromRight False . parse (p <$> lineP) "")
 
 lineP :: Parser Requirement
 lineP = do { low  <- read <$> many1 digit <* char '-'
@@ -22,12 +22,20 @@ lineP = do { low  <- read <$> many1 digit <* char '-'
            ; return $ Requirement low high c cs
            }
 
-checkPassword :: Requirement -> Bool
-checkPassword (Requirement low high c cs) =
+check1 :: Requirement -> Bool
+check1 (Requirement low high c cs) =
     let cCount = length . filter (== c) $ cs
      in cCount <= high && cCount >= low
 
+check2 :: Requirement -> Bool
+check2 (Requirement x y c cs) =
+    max x y <= length cs &&
+        let cx = cs !! (x - 1)
+            cy = cs !! (y - 1)
+         in (cx == c && cy /= c) || (cx /= c && cy == c)
+
 main :: IO ()
 main = do { input <- readFile "input"
-          ; print . solve1 . lines $ input
+          ; print . solve check1 . lines $ input
+          ; print . solve check2 . lines $ input
           }
