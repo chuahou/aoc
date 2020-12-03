@@ -24,7 +24,15 @@ walk slope css   = (if c == Tree then 1 else 0) + (walk slope . step $ css)
 part1 :: Map -> Int
 part1 = walk (3, 1)
 
+part2 :: Map -> Int
+part2 m = product . map (`walk` m) $ [ (1, 1)
+                                     , (3, 1)
+                                     , (5, 1)
+                                     , (7, 1)
+                                     , (1, 2)
+                                     ]
+
 main :: IO ()
 main = do { input <- readFile "input"
-          ; forM_ [part1] (\p -> print . solve p $ input)
+          ; forM_ [part1, part2] (\p -> print . solve p $ input)
           }
