@@ -7,12 +7,6 @@ type Pass   = String
 type Seat   = (Int, Int)
 type SeatId = Int
 
-solve :: ([Pass] -> a) -> String -> a
-solve f = f . lines
-
-part1 :: [Pass] -> Int
-part1 = maximum . map (seatId . parse)
-
 parse :: Pass -> Seat
 parse ps = let (rowStr, colStr) = splitAt 7 ps
             in (toInt 'B' 'F' rowStr, toInt 'R' 'L' colStr)
@@ -23,8 +17,14 @@ toInt high low = foldl s 0
                 | x == low  = n * 2
                 | otherwise = error "Parse error"
 
-seatId :: Seat -> Int
+seatId :: Seat -> SeatId
 seatId (r, c) = r * 8 + c
+
+solve :: ([Pass] -> a) -> String -> a
+solve f = f . lines
+
+part1 :: [Pass] -> SeatId
+part1 = maximum . map (seatId . parse)
 
 part2 :: [Pass] -> a
 part2 = undefined
