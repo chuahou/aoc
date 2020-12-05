@@ -22,14 +22,14 @@ toInt high low = foldl s 0
 seatId :: Seat -> SeatId
 seatId (r, c) = r * 8 + c
 
-solve :: ([Pass] -> a) -> String -> a
-solve f = f . lines
+solve :: ([SeatId] -> a) -> String -> a
+solve f = f . map (seatId . parse) . lines
 
-part1 :: [Pass] -> SeatId
-part1 = maximum . map (seatId . parse)
+part1 :: [SeatId] -> SeatId
+part1 = maximum
 
-part2 :: [Pass] -> SeatId
-part2 ps = let ids      = sort . map (seatId . parse) $ ps
+part2 :: [SeatId] -> SeatId
+part2 xs = let ids      = sort xs
                find []  = Nothing
                find [_] = Nothing
                find (x:y:ys) = if x + 2 == y then Just (x + 1) else find (y:ys)
