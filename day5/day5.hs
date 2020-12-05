@@ -2,6 +2,8 @@
 -- Copyright (c) 2020 Chua Hou
 
 import           Control.Monad (forM_)
+import           Data.List     (sort)
+import           Data.Maybe    (fromMaybe)
 
 type Pass   = String
 type Seat   = (Int, Int)
@@ -26,8 +28,12 @@ solve f = f . lines
 part1 :: [Pass] -> SeatId
 part1 = maximum . map (seatId . parse)
 
-part2 :: [Pass] -> a
-part2 = undefined
+part2 :: [Pass] -> SeatId
+part2 ps = let ids      = sort . map (seatId . parse) $ ps
+               find []  = Nothing
+               find [_] = Nothing
+               find (x:y:ys) = if x + 2 == y then Just (x + 1) else find (y:ys)
+            in fromMaybe (error "Could not find seat") $ find ids
 
 main :: IO ()
 main = do { input <- readFile "input"
