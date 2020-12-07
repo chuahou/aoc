@@ -31,7 +31,7 @@ part2 = flip part2' "shinygold" . makeMap
 
 part2' :: M.Map String [(Int, String)] -> String -> Int
 part2' m s = case M.lookup s m of
-               Just bs -> sum . map (\(n, s') -> n * (1 + part2' m s')) $ bs
+               Just bs -> foldr (\(n, s') -> (+) (n * (1 + part2' m s'))) 0 bs
                Nothing -> error $ "can't find bag colour " <> s
 
 main :: IO ()
