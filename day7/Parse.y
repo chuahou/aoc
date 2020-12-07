@@ -2,7 +2,7 @@
 -- Copyright (c) 2020 Chua Hou
 
 {
-module Parse (parse) where
+module Parse (Rule(..), parse) where
 
 import Data.Graph
 import Lex
