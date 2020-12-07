@@ -2,7 +2,7 @@
 -- Copyright (c) 2020 Chua Hou
 
 {
-module Lex (tokens) where
+module Lex (Token(..), tokens) where
 }
 
 %wrapper "basic"
@@ -14,8 +14,9 @@ tokens :-
 
     $white+     ;
     $digit+     { NUM . read        }
-    contains?   { const CONTAINS    }
+    contain     { const CONTAIN     }
     bags?       { const BAG         }
+    "no other"  { const NOOTHER     }
     $alpha+     { WORD              }
     \,          { const COMMA       }
     \.          { const PERIOD      }
@@ -23,10 +24,11 @@ tokens :-
 {
 data Token = WORD String
            | NUM Int
-           | CONTAINS
+           | CONTAIN
            | BAG
            | COMMA
            | PERIOD
+           | NOOTHER
     deriving (Show, Eq)
 
 tokens :: String -> [Token]
