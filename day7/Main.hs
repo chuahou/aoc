@@ -27,11 +27,11 @@ part1 rs = let (g, _, k2v) = makeGraph rs
             in flip (-) 1 . length . G.reachable g' $ b
 
 part2 :: [Rule] -> Int
-part2 = flip (-) 1 . flip part2' "shinygold" . makeMap
+part2 = flip part2' "shinygold" . makeMap
 
 part2' :: M.Map String [(Int, String)] -> String -> Int
 part2' m s = case M.lookup s m of
-               Just bs -> 1 + (sum . map (\(n, s') -> n * part2' m s') $ bs)
+               Just bs -> sum . map (\(n, s') -> n * (1 + part2' m s')) $ bs
                Nothing -> error $ "can't find bag colour " <> s
 
 main :: IO ()
