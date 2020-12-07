@@ -8,9 +8,9 @@ import qualified Data.Map.Strict as M
 import           Lex             (tokens)
 import           Parse           (Rule (..), parse)
 
-makeGraph :: [Rule] ->
-             (G.Graph, G.Vertex -> (String, String, [String]),
-             String -> Maybe G.Vertex)
+makeGraph :: [Rule] -> (G.Graph,
+                        G.Vertex -> (String, String, [String]),
+                        String -> Maybe G.Vertex)
 makeGraph = G.graphFromEdges . map makeEdge
     where makeEdge (Rule b bs) = (b, b, map snd bs)
 
