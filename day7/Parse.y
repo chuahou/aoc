@@ -15,7 +15,7 @@ import Lex
 %token
     word    { WORD $$   }
     num     { NUM  $$   }
-    contain { CONTAIN  }
+    contain { CONTAIN   }
     bag     { BAG       }
     comma   { COMMA     }
     period  { PERIOD    }
