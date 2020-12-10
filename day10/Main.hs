@@ -1,0 +1,37 @@
+-- SPDX-License-Identifier: MIT
+-- Copyright (c) 2020 Chua Hou
+
+{-# OPTIONS_GHC -Wall #-}
+
+import           Control.Monad      (forM_)
+import           Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
+import           Data.Maybe         (fromMaybe)
+import           Text.Read          (readMaybe)
+
+type ParsedInput = NonEmpty Int
+type Output      = Int
+
+fromList :: [a] -> Maybe (NonEmpty a)
+fromList (x:xs) = Just $ x :| xs
+fromList []     = Nothing
+
+parse :: String -> Maybe ParsedInput
+parse xs = (mapM readMaybe . lines) xs >>= fromList
+
+part1 :: ParsedInput -> Output
+part1 xs = let sorted = NE.sort xs
+               diffs  = zipWith subtract (NE.toList sorted) (NE.tail sorted)
+               diffs' = 3 : NE.head sorted : diffs
+               ones   = length . filter (== 1) $ diffs'
+               threes = length . filter (== 3) $ diffs'
+            in ones * threes
+
+part2 :: ParsedInput -> Output
+part2 = undefined
+
+main :: IO ()
+main = do { input <- fromMaybe (error "Empty parse") . parse
+                      <$> readFile "input"
+          ; forM_ [part1, part2] (\p -> print . p $ input)
+          }
