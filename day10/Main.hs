@@ -4,13 +4,16 @@
 {-# OPTIONS_GHC -Wall #-}
 
 import           Control.Monad      (forM_)
+import           Data.List          (sort)
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import           Data.Maybe         (fromMaybe)
 import           Text.Read          (readMaybe)
 
-type ParsedInput = NonEmpty Int
+type ParsedInput = NonEmpty Jolts
 type Output      = Int
+
+type Jolts = Int
 
 fromList :: [a] -> Maybe (NonEmpty a)
 fromList (x:xs) = Just $ x :| xs
@@ -28,7 +31,15 @@ part1 xs = let sorted = NE.sort xs
             in ones * threes
 
 part2 :: ParsedInput -> Output
-part2 = undefined
+part2 xs = let sorted = 0 : (sort . NE.toList $ xs)
+            in ways sorted (length sorted - 1)
+
+ways :: [Jolts] -> Int -> Int
+ways xs = (table !!)
+    where table = map f [0..]
+          f 0 = 1
+          f n = let feasible i = xs !! n - xs !! i <= 3
+                 in sum . map (table !!) . filter feasible $ [0..n-1]
 
 main :: IO ()
 main = do { input <- fromMaybe (error "Empty parse") . parse
