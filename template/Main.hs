@@ -18,8 +18,10 @@ part1 = undefined
 part2 :: ParsedInput -> Output
 part2 = undefined
 
+runFile :: String -> IO ()
+runFile s = do { input <- fromMaybe (error "Parse error") . parse <$> readFile s
+               ; forM_ [part1, part2] (\p -> print . p $ input)
+               }
+
 main :: IO ()
-main = do { input <-  fromMaybe (error "Parse error") . parse
-                  <$> readFile "input"
-          ; forM_ [part1, part2] (\p -> print . p $ input)
-          }
+main = runFile "input"
