@@ -1,111 +1,78 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 --
--- Refactored solution below inspired by
+-- Re-refactored simpler solution below heavily inspired by
 -- https://github.com/mstksg/advent-of-code-2020
+-- https://github.com/pwm/aoc2020
+--
+-- See further back in commit history for all my terrible solutions prior to
+-- checking these solutions.
 
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE TupleSections #-}
 
 import           Control.Monad   (forM_)
-import           Data.Map        (Map)
+import           Data.Map        (Map, (!?))
 import qualified Data.Map.Strict as Map
 import           Data.Maybe      (fromMaybe, mapMaybe)
-import           Data.Set        (Set)
-import qualified Data.Set        as Set
 
-type ParsedInput = (Set Pos, (Int, Int))
+type ParsedInput = State
 type Output      = Int
 
-type Pos  = (Int, Int)
-data Seat = Empty | Occupied deriving (Show, Eq)
+type Pos   = (Int, Int)
+type State = Map Pos Seat
+data Seat  = Empty | Occupied | Floor deriving Eq
 
-type Neighbours = Map Pos (Set Pos)
-type State      = Map Pos Seat
+fix :: Eq a => (a -> a) -> a -> a
+fix f x = let x' = f x in if x == x' then x else fix f x'
 
-head' :: [a] -> Maybe a
-head' []    = Nothing
-head' (x:_) = Just x
+step :: Int -> (State -> Pos -> [Seat]) -> State -> State
+step threshold getSet state = Map.mapWithKey step' state
+    where
+        step' pos Empty    = if Occupied `notElem` getSet state pos
+                                then Occupied else Empty
+        step' pos Occupied = if not . null . drop (threshold - 1)
+                                . filter (== Occupied) $ getSet state pos
+                                then Empty else Occupied
+        step' _   Floor    = Floor
 
-fix :: Eq a => (a -> (a, Bool)) -> a -> a
-fix f x = let (x', b) = f x
-           in if b then fix f x' else x
+neighbours :: State -> Pos -> [Seat]
+neighbours s (x, y) = mapMaybe (s !?) [ (x + dx, y + dy)
+                                      | (dx, dy) <- directions
+                                      ]
 
-neighbours :: Set Pos -> (Int, Int) -> Neighbours
-neighbours ps (h, w) = Map.fromList . Set.toList $ Set.map neighbours' ps
-    where neighbours' (x, y) = ((x, y), Set.fromList [ (x', y')
-                                                     | x' <- [x-1..x+1]
-                                                     , x' >= 0 && x' < h
-                                                     , y' <- [y-1..y+1]
-                                                     , y' >= 0 && y' < w
-                                                     , x' /= x || y' /= y
-                                                     , (x', y') `Set.member` ps
-                                                     ])
+visible :: State -> Pos -> [Seat]
+visible s (x, y) = mapMaybe visible' directions
+    where
+        visible' (dx, dy) = visible'' (x + dx, y + dy) (dx, dy)
+        visible'' (x', y') (dx, dy) =
+            case s !? (x', y') of
+              Just Occupied -> Just Occupied
+              Just Empty    -> Nothing
+              Just Floor    -> visible'' (x' + dx, y' + dy) (dx, dy)
+              Nothing       -> Nothing
 
-visible :: Set Pos -> (Int, Int) -> Neighbours
-visible ps (h, w) = Map.fromList . Set.toList $ Set.map visible' ps
-    where visible' (x, y) = ( (x, y)
-                            , Set.fromList . mapMaybe (visible'' (x, y)) $ dirns
-                            )
-          dirns = [ (dx, dy)
-                  | dx <- [-1..1]
-                  , dy <- [-1..1]
-                  , dx /= 0 || dy /= 0
-                  ]
-          visible'' (x', y') (dx, dy)
-            | x' < 0 || x' > h || y' < 0 || y' > w = Nothing
-            | (x' + dx, y' + dy) `Set.member` ps   = Just (x'+dx, y'+dy)
-            | otherwise                            = visible'' (x'+dx, y'+dy)
-                                                               (dx, dy)
-
-initState :: Set Pos -> State
-initState = Map.fromSet (const Empty)
-
-step :: Int -> Neighbours -> State -> (State, Bool)
-step threshold ns = fromMaybe (error "Failed to step") . step' threshold ns
-
-step' :: Int -> Neighbours -> State -> Maybe (State, Bool)
-step' threshold ns ss = Map.foldrWithKey c (Just (Map.empty, False)) ss
-    where c key st mb = do
-            { (m, b) <- mb
-            ; ns'    <- Map.lookup key ns
-            ; let nsStates = Map.filter (== Occupied)
-                           $ Map.intersection ss (Map.fromSet id ns')
-            ; let (st', b') = case st of
-                                Occupied -> if length nsStates >= threshold
-                                               then (Empty, True)
-                                               else (Occupied, b)
-                                Empty    -> if null nsStates
-                                               then (Occupied, True)
-                                               else (Empty, b)
-            ; return (Map.insert key st' m, b || b')
-            }
+directions :: [Pos]
+directions = [ (x, y) | x <- [-1..1] , y <- [-1..1] , (x, y) /= (0, 0) ]
 
 parse :: String -> Maybe ParsedInput
-parse cs = do { let ls = lines cs
-              ; let h  = length ls
-              ; w  <- length <$> head' ls
-              ; ss <- Set.map fst
-                   <$> (foldr filtSeat (Just Set.empty) . concat . enumerate) ls
-              ; return (ss, (h, w))
-              }
-    where filtSeat (p, 'L') ys = Set.insert (p, 'L') <$> ys
-          filtSeat (_, '.') ys = ys
-          filtSeat _        _  = Nothing
-          enumerate = zipWith (\i -> zip (map (i,) [0..])) [0..]
+parse = fmap Map.fromList . mapM readSeat . enumerate . lines
+    where
+        enumerate = concat . zipWith (\i -> zip (map (i,) [0..])) [0..]
+        readSeat (p, 'L') = Just (p, Empty)
+        readSeat (p, '.') = Just (p, Floor)
+        readSeat (_, _)   = Nothing
 
 part1 :: ParsedInput -> Output
-part1 (ps, (w, h)) = let ns = neighbours ps (w, h)
-                         st = fix (step 4 ns) (initState ps)
-                      in length . Map.filter (== Occupied) $ st
+part1 = Map.size . Map.filter (== Occupied) . fix (step 4 neighbours)
 
 part2 :: ParsedInput -> Output
-part2 (ps, (w, h)) = let ns = visible ps (w, h)
-                         st = fix (step 5 ns) (initState ps)
-                      in length . Map.filter (== Occupied) $ st
+part2 = Map.size . Map.filter (== Occupied) . fix (step 5 visible)
+
+solve :: String -> IO ()
+solve s = do { input <-  fromMaybe (error "Parse error") . parse <$> readFile s
+             ; forM_ [part1, part2] (\p -> print . p $ input)
+             }
 
 main :: IO ()
-main = do { input <-  fromMaybe (error "Parse error") . parse
-                  <$> readFile "input"
-          ; forM_ [part1, part2] (\p -> print . p $ input)
-          }
+main = solve "input"
