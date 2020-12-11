@@ -25,9 +25,9 @@ head' :: [a] -> Maybe a
 head' []    = Nothing
 head' (x:_) = Just x
 
-fix :: Eq a => (a -> a) -> a -> a
-fix f x = let x' = f x
-           in if x == x' then x else fix f x'
+fix :: Eq a => (a -> (a, Bool)) -> a -> a
+fix f x = let (x', b) = f x
+           in if b then fix f x' else x
 
 neighbours :: [Pos] -> (Int, Int) -> Neighbours
 neighbours ps (h, w) = Map.fromList $ map neighbours' ps
@@ -43,24 +43,24 @@ neighbours ps (h, w) = Map.fromList $ map neighbours' ps
 initState :: [Pos] -> State
 initState ps = Map.fromList $ map (, Empty) ps
 
-step :: Int -> Neighbours -> State -> State
+step :: Int -> Neighbours -> State -> (State, Bool)
 step threshold ns = fromMaybe (error "Failed to step") . step' threshold ns
 
-step' :: Int -> Neighbours -> State -> Maybe State
-step' threshold ns ss = Map.foldrWithKey c (Just Map.empty) ss
-    where c :: Pos -> Seat -> Maybe State -> Maybe State
-          c key st y = do
+step' :: Int -> Neighbours -> State -> Maybe (State, Bool)
+step' threshold ns ss = Map.foldrWithKey c (Just (Map.empty, False)) ss
+    where c key st mb = do
             { nsStates <-  filter (== Occupied)
                        .   mapMaybe (`Map.lookup` ss)
                        <$> Map.lookup key ns
-            ; let st' = case st of
-                          Occupied -> if length nsStates >= threshold
-                                         then Empty
-                                         else Occupied
-                          Empty    -> if null nsStates
-                                         then Occupied
-                                         else Empty
-            ; Map.insert key st' <$> y
+            ; (m, b) <- mb
+            ; let (st', b') = case st of
+                                Occupied -> if length nsStates >= threshold
+                                               then (Empty, True)
+                                               else (Occupied, b)
+                                Empty    -> if null nsStates
+                                               then (Occupied, True)
+                                               else (Empty, b)
+            ; return (Map.insert key st' m, b || b')
             }
 
 parse :: String -> Maybe ParsedInput
