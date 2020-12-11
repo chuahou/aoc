@@ -40,6 +40,20 @@ neighbours ps (h, w) = Map.fromList $ map neighbours' ps
                                         , (x', y') `elem` ps
                                         ])
 
+visible :: [Pos] -> (Int, Int) -> Neighbours
+visible ps (h, w) = Map.fromList $ map visible' ps
+    where visible' (x, y) = ((x, y), mapMaybe (visible'' (x, y)) dirns)
+          dirns = [ (dx, dy)
+                  | dx <- [-1..1]
+                  , dy <- [-1..1]
+                  , dx /= 0 || dy /= 0
+                  ]
+          visible'' (x', y') (dx, dy)
+            | x' < 0 || x' > h || y' < 0 || y' > w = Nothing
+            | (x' + dx, y' + dy) `elem` ps         = Just (x'+dx, y'+dy)
+            | otherwise                            = visible'' (x'+dx, y'+dy)
+                                                               (dx, dy)
+
 initState :: [Pos] -> State
 initState ps = Map.fromList $ map (, Empty) ps
 
@@ -82,7 +96,9 @@ part1 (ps, (w, h)) = let ns = neighbours ps (w, h)
                       in length . Map.filter (== Occupied) $ st
 
 part2 :: ParsedInput -> Output
-part2 = undefined
+part2 (ps, (w, h)) = let ns = visible ps (w, h)
+                         st = fix (step 5 ns) (initState ps)
+                      in length . Map.filter (== Occupied) $ st
 
 main :: IO ()
 main = do { input <-  fromMaybe (error "Parse error") . parse
