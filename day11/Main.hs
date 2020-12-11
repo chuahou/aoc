@@ -11,10 +11,7 @@ type Output      = Int
 
 data Cell = Floor | Empty | Occupied deriving Eq
 
-data Grid a = Grid { height :: Int
-                   , width  :: Int
-                   , cells  :: [[a]]
-                   } deriving Eq
+data Grid a = Grid Int Int [[a]] deriving Eq
 
 instance Show Cell where
     show Floor    = "."
@@ -24,37 +21,32 @@ instance Show Cell where
 instance Show a => Show (Grid a) where
     show (Grid _ _ css) = unlines . map (concatMap show) $ css
 
-gridFromList :: [[a]] -> Grid a
-gridFromList xss = let h = length xss
-                       w = minimum . map length $ xss -- can't handle infinite!
-                    in Grid h w (map (take w) xss)
+toGrid :: [[a]] -> Grid a
+toGrid xss = let h = length xss
+                 w = minimum . map length $ xss -- can't handle infinite!
+              in Grid h w (map (take w) xss)
 
-gridIndex :: Grid a -> Int -> Int -> Maybe a
-gridIndex (Grid h w css) i j
+(<!!>) :: Grid a -> (Int, Int) -> Maybe a
+(Grid h w css) <!!> (i, j)
     | i < h && i >= 0 && j < w && j >= 0 = Just $ css !! i !! j
     | otherwise                          = Nothing
 
-(<!!>) :: Grid a -> (Int, Int) -> Maybe a
-(<!!>) g = uncurry $ gridIndex g
-
-gridNeighbours :: Grid a -> Int -> Int -> [a]
-gridNeighbours g i j = mapMaybe (g <!!>) indices
+neighbours :: Grid a -> (Int, Int) -> [a]
+neighbours g (i, j) = mapMaybe (g <!!>) indices
     where
         indices = [ (x, y) | x <- [i-1..i+1], y <-[j-1..j+1], x /= i || y /= j ]
 
-gridVisible :: Grid Cell -> Int -> Int -> [Cell]
-gridVisible g i j = mapMaybe (moveDir (i, j)) directions
+rays :: Grid Cell -> (Int, Int) -> [Cell]
+rays g ij = mapMaybe (cast ij) directions
     where
         directions = [ (x, y) | x <- [-1..1], y <- [-1..1], x /= 0 || y /= 0 ]
-            :: [(Int, Int)]
-        moveDir (i', j') (di, dj) =
-            let i'' = i' + di
-                j'' = j' + dj
-             in case g <!!> (i'', j'') of
-                  Just Occupied -> Just Occupied
-                  Just Empty    -> Nothing
-                  Just Floor    -> moveDir (i'', j'') (di, dj)
-                  Nothing       -> Nothing
+        cast (i0, j0) (di, dj) = foldr c Nothing $
+            [ (i0 + n * di, j0 + n * dj) | n <- [1..] ]
+        c ij' m = case g <!!> ij' of
+                   Just Empty    -> Nothing
+                   Just Occupied -> Just Occupied
+                   Just Floor    -> m
+                   Nothing       -> Nothing
 
 gridIndices :: Grid a -> [[(Int, Int)]]
 gridIndices (Grid h w _) = [ [(x, y) | y <- [0..w-1] ] | x <- [0..h-1] ]
@@ -62,45 +54,33 @@ gridIndices (Grid h w _) = [ [(x, y) | y <- [0..w-1] ] | x <- [0..h-1] ]
 gridFilter :: (a -> Bool) -> Grid a -> [a]
 gridFilter p (Grid _ _ css) = concatMap (filter p) css
 
-step :: Grid Cell -> Grid Cell
-step g = gridFromList . map (map stepCell) . gridIndices $ g
-    where
-        stepCell (i, j) =
+step :: (Grid Cell -> (Int, Int) -> Int) -> Int -> Grid Cell -> Grid Cell
+step count threshold g = toGrid . map (map stepCell) $ indices g
+    where stepCell (i, j) =
             case fromMaybe (error "Indexing error") $ g <!!> (i, j) of
               Floor    -> Floor
-              Empty    -> if null $ occupiedNeighbours i j
-                          then Occupied else Empty
-              Occupied -> if length (occupiedNeighbours i j) >= 4
+              Empty    -> if count g (i, j) > 0
                           then Empty else Occupied
-        occupiedNeighbours i j = filter (== Occupied) $ gridNeighbours g i j
+              Occupied -> if count g (i, j) >= threshold
+                          then Empty else Occupied
+          indices (Grid h w _) = [ [ (x, y) | y <- [0..w-1] ] | x <- [0..h-1] ]
 
-step' :: Grid Cell -> Grid Cell
-step' g = gridFromList . map (map stepCell) . gridIndices $ g
-    where
-        stepCell (i, j) =
-            case fromMaybe (error "Indexing error") $ g <!!> (i, j) of
-              Floor    -> Floor
-              Empty    -> if null $ occupiedVisible i j
-                          then Occupied else Empty
-              Occupied -> if length (occupiedVisible i j) >= 5
-                          then Empty else Occupied
-        occupiedVisible i j = filter (== Occupied) $ gridVisible g i j
+fix :: (Grid Cell -> Grid Cell) -> Grid Cell -> Grid Cell
+fix f g = let g' = f g in if g == g' then g' else fix f g'
 
 parse :: String -> Maybe ParsedInput
-parse = fmap gridFromList . mapM (mapM cell) . lines
+parse = fmap toGrid . mapM (mapM cell) . lines
     where cell 'L' = Just Empty
           cell '.' = Just Floor
           cell _   = Nothing
 
 part1 :: ParsedInput -> Output
-part1 = length . gridFilter (== Occupied) . fix
-    where fix g = let g' = step g
-                   in if g == g' then g else fix g'
+part1 = length . gridFilter (== Occupied) . fix (step count 4)
+    where count g = length . filter (== Occupied) . neighbours g
 
 part2 :: ParsedInput -> Output
-part2 = length . gridFilter (== Occupied) . fix
-    where fix g = let g' = step' g
-                   in if g == g' then g else fix g'
+part2 = length . gridFilter (== Occupied) . fix (step count 5)
+    where count g = length . filter (== Occupied) . rays g
 
 main :: IO ()
 main = do { input <- fromMaybe (error "Parse error") . parse
