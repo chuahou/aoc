@@ -15,29 +15,38 @@ import           Text.Read          (readMaybe)
 data Instruction = MoveDir Direction Int | L | R | LL | F Int
     deriving (Show, Eq)
 
-type Direction = (Int, Int)
-
 type Pos   = (Int, Int)
 data State = State Pos Direction
+
+type Direction = Pos
 
 initState :: State
 initState = State (0, 0) (1, 0)
 
+initState' :: State
+initState' = State (0, 0) (10, 1)
+
 moveDir :: Direction -> Int -> Pos -> Pos
 moveDir (dx, dy) l (x, y) = (x + l * dx, y + l * dy)
 
+manhattan :: State -> Int
+manhattan (State (x, y) _) = abs x + abs y
+
 ----- SOLUTION -----
 
-runInstruction :: Instruction -> State -> State
-runInstruction (MoveDir dir len) (State pos dir') =
-    State (moveDir dir len pos) dir'
-runInstruction (F len) (State pos dir)    = State (moveDir dir len pos) dir
-runInstruction L       (State pos (x, y)) = State pos (-y,  x)
-runInstruction R       (State pos (x, y)) = State pos ( y, -x)
-runInstruction LL      (State pos (x, y)) = State pos (-x, -y)
+step :: Instruction -> State -> State
+step (MoveDir dir len) (State pos dir')   = State (moveDir dir len pos) dir'
+step (F len)           (State pos dir)    = State (moveDir dir len pos) dir
+step L                 (State pos (x, y)) = State pos (-y,  x)
+step R                 (State pos (x, y)) = State pos ( y, -x)
+step LL                (State pos (x, y)) = State pos (-x, -y)
 
-run :: [Instruction] -> State -> State
-run is s = foldl' (flip runInstruction) s is
+step' :: Instruction -> State -> State
+step' (MoveDir dir len) (State pos dir') = State pos (moveDir dir len dir')
+step' i                 s                = step i s
+
+run :: (Instruction -> State -> State) -> [Instruction] -> State -> State
+run f xs y = foldl' (flip f) y xs
 
 ----- PARSERS -----
 
@@ -77,11 +86,10 @@ parse s = case P.parse (P.many (instructionP <* P.endOfLine)) "" s of
             Left  _  -> Nothing
 
 part1 :: ParsedInput -> Output
-part1 is = let State (x, y) _ = run is initState
-            in abs x + abs y
+part1 xs = manhattan $ run step xs initState
 
 part2 :: ParsedInput -> Output
-part2 = undefined
+part2 xs = manhattan $ run step' xs initState'
 
 runFile :: String -> IO ()
 runFile s = do { input <- fromMaybe (error "Parse error") . parse <$> readFile s
