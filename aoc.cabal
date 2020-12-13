@@ -29,6 +29,7 @@ data-files:
     input/day11.txt
     input/day12.txt
     input/day13.txt
+    scripts/main.sh
 
 source-repository head
   type: git
