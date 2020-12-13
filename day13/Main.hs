@@ -7,9 +7,9 @@
 
 import           Control.Applicative ((<|>))
 import           Control.Monad       (forM_)
-import           Data.Function       (on)
-import           Data.List           (minimumBy)
+import           Data.List           (minimumBy, sortOn)
 import           Data.Maybe          (fromMaybe, mapMaybe)
+import           Data.Ord            (comparing)
 import qualified Text.Parsec         as P
 import           Text.Parsec.String  (Parser)
 import           Text.Read           (readMaybe)
@@ -25,12 +25,24 @@ ceilDiv x y = (x + y - 1) `div` y
 ----- SOLUTION -----
 
 firstBus :: Int -> [Bus] -> (Bus, Int)
-firstBus x = minimumBy (compare `on` snd)
+firstBus x = minimumBy (comparing snd)
            . mapMaybe (\b -> (b,) <$> waitBus x b)
 
 waitBus :: Int -> Bus -> Maybe Int
-waitBus x (Bus b)      = Just $ (x `ceilDiv` b) * b - x
-waitBus _ OutOfService = Nothing
+waitBus x (Bus b) = Just $ (x `ceilDiv` b) * b - x
+waitBus _ _       = Nothing
+
+findNiceTime :: [Bus] -> Int
+findNiceTime = solve . sortOn ((0 -) . snd) . mapMaybe fromBus . zip [0..]
+    where
+        fromBus (t, Bus b) = Just (t, b)
+        fromBus _          = Nothing
+        solve []       = 0
+        solve [(r, _)] = -r
+        solve ((r1, f1):((r2, f2):xs)) =
+            let t = head . filter (\x -> (x + r2) `rem` f2 == 0)
+                  $ [ n * f1 - r1 | n <- [0..] ]
+             in solve ((-t, lcm f1 f2):xs)
 
 ----- PARSERS -----
 
@@ -61,11 +73,11 @@ parse s = case P.parse inputP "" s of
 
 part1 :: ParsedInput -> Output
 part1 (x, bs) = case firstBus x bs of
-                  (Bus b, t)        -> b * t
-                  (OutOfService, _) -> error "Invalid bus"
+                  (Bus b, t) -> b * t
+                  _          -> error "Invalid bus"
 
 part2 :: ParsedInput -> Output
-part2 = undefined
+part2 = findNiceTime . snd
 
 runFile :: String -> IO ()
 runFile s = do { input <- fromMaybe (error "Parse error") . parse <$> readFile s
