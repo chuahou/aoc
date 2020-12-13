@@ -34,7 +34,7 @@ import qualified AOC.Days.Day23 as Day23
 import qualified AOC.Days.Day24 as Day24
 import qualified AOC.Days.Day25 as Day25
 
-getDay :: Int -> Maybe (String -> Maybe String)
+getDay :: Int -> Maybe (String -> Maybe (IO ()))
 getDay n = let solns  = $(daySolutions)
                (a, b) = bounds solns
             in if n < a || n > b then Nothing else Just $ solns ! n

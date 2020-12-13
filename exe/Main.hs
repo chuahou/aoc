@@ -3,6 +3,7 @@
 
 module Main where
 
+import           Data.Maybe         (fromMaybe)
 import           System.Environment (getArgs)
 import           Text.Read          (readMaybe)
 
@@ -22,5 +23,5 @@ runDay :: Int -> IO ()
 runDay n = case (,) <$> getDay n <*> formatDay n of
              Just (f, cs) ->  getDataFileName ("input/day" <> cs <> ".txt")
                           >>= readFile
-                          >>= maybe (error "Parse error") putStrLn . f
+                          >>= fromMaybe (error "Parse error") . f
              Nothing      ->  error "Invalid day number"

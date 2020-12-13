@@ -22,7 +22,8 @@ dependencies:
     - base >= 4.13 && < 5
 
 data-files:
-    input/day*.txt
+    - input/day*.txt
+    - scripts/*.sh
 
 library:
     source-dirs: src
@@ -30,6 +31,7 @@ library:
         - array
         - parsec
         - template-haskell
+        - process >= 1.6.9.0 && < 1.7
 
 executable:
     main:         Main.hs
