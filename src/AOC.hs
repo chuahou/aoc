@@ -3,5 +3,5 @@
 
 module AOC where
 
-x :: String
-x = "Hello, nix!"
+runDay :: Int -> IO ()
+runDay = undefined

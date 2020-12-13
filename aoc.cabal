@@ -27,8 +27,8 @@ library
       Paths_aoc
   hs-source-dirs:
       src
-  default-extensions: BangPatterns GADTs LambdaCase Safe TupleSections TypeOperators
-  ghc-options: -Wall
+  default-extensions: BangPatterns GADTs LambdaCase TupleSections TypeOperators
+  ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   build-depends:
       base >=4.13 && <5
   default-language: Haskell2010
@@ -39,8 +39,8 @@ executable aoc
       Paths_aoc
   hs-source-dirs:
       exe
-  default-extensions: BangPatterns GADTs LambdaCase Safe TupleSections TypeOperators
-  ghc-options: -Wall
+  default-extensions: BangPatterns GADTs LambdaCase TupleSections TypeOperators
+  ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   build-depends:
       aoc
     , base >=4.13 && <5

@@ -6,13 +6,15 @@ category:    hmm
 github:      chuahou/aoc
 maintainer:  Chua Hou <human+github@chuahou.dev>
 
-ghc-options: -Wall
+ghc-options:
+    - -Wall
+    - -fwarn-incomplete-uni-patterns
+    - -fwarn-incomplete-record-updates
 
 default-extensions:
     - BangPatterns
     - GADTs
     - LambdaCase
-    - Safe
     - TupleSections
     - TypeOperators
 
@@ -25,4 +27,5 @@ library:
 executable:
     main:         Main.hs
     source-dirs:  exe
-    dependencies: aoc
+    dependencies:
+        - aoc

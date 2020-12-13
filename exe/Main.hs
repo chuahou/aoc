@@ -3,7 +3,14 @@
 
 module Main where
 
-import           AOC
+import           System.Environment (getArgs)
+import           Text.Read          (readMaybe)
+
+import           AOC                (runDay)
 
 main :: IO ()
-main = putStrLn x
+main = getArgs >>= \case
+    [n] -> case readMaybe n of
+             Just n' -> runDay n'
+             Nothing -> error "Expected exactly 1 integer argument"
+    _   -> error "Expected exactly 1 argument"
