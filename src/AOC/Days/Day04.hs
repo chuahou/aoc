@@ -6,4 +6,4 @@ module AOC.Days.Day04 (solution) where
 import           AOC.Solution
 
 solution :: a :=> b
-solution = Script "scripts/main.sh"
+solution = Script "scripts/day04.sh"
