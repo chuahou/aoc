@@ -6,7 +6,10 @@ module Main where
 import           System.Environment (getArgs)
 import           Text.Read          (readMaybe)
 
-import           AOC                (runDay)
+import           AOC                (getDay)
+import           AOC.Days           (formatDay)
+
+import           Paths_aoc
 
 main :: IO ()
 main = getArgs >>= \case
@@ -14,3 +17,10 @@ main = getArgs >>= \case
              Just n' -> runDay n'
              Nothing -> error "Expected exactly 1 integer argument"
     _   -> error "Expected exactly 1 argument"
+
+runDay :: Int -> IO ()
+runDay n = case formatDay n of
+             Just cs ->  getDataFileName ("input/day" <> cs <> ".txt")
+                     >>= readFile
+                     >>= maybe (error "Parse error") putStrLn . getDay n
+             Nothing -> error "Invalid day number"

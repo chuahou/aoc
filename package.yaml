@@ -21,8 +21,14 @@ default-extensions:
 dependencies:
     - base >= 4.13 && < 5
 
+data-files:
+    input/day*.txt
+
 library:
     source-dirs: src
+    dependencies:
+        - array
+        - template-haskell
 
 executable:
     main:         Main.hs
