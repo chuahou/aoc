@@ -19,8 +19,8 @@ main = getArgs >>= \case
     _   -> error "Expected exactly 1 argument"
 
 runDay :: Int -> IO ()
-runDay n = case formatDay n of
-             Just cs ->  getDataFileName ("input/day" <> cs <> ".txt")
-                     >>= readFile
-                     >>= maybe (error "Parse error") putStrLn . getDay n
-             Nothing -> error "Invalid day number"
+runDay n = case (,) <$> getDay n <*> formatDay n of
+             Just (f, cs) ->  getDataFileName ("input/day" <> cs <> ".txt")
+                          >>= readFile
+                          >>= maybe (error "Parse error") putStrLn . f
+             Nothing      ->  error "Invalid day number"

@@ -5,6 +5,8 @@
 
 module AOC (getDay) where
 
+import           Data.Array     (bounds, (!))
+
 import           AOC.Days
 import qualified AOC.Days.Day01 as Day01
 import qualified AOC.Days.Day02 as Day02
@@ -32,5 +34,7 @@ import qualified AOC.Days.Day23 as Day23
 import qualified AOC.Days.Day24 as Day24
 import qualified AOC.Days.Day25 as Day25
 
-getDay :: Int -> (String -> Maybe String)
-getDay n = $(daySolutions) !! (n - 1)
+getDay :: Int -> Maybe (String -> Maybe String)
+getDay n = let solns  = $(daySolutions)
+               (a, b) = bounds solns
+            in if n < a || n > b then Nothing else Just $ solns ! n
