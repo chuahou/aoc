@@ -1,0 +1,16 @@
+name:        aoc
+version:     0.1.0.0
+synopsis:    Advent of Code 2020 solutions
+description: My solutions for Advent of Code 2020, primarily in Haskell.
+category:    hmm
+github:      chuahou/aoc
+maintainer:  Chua Hou <human+github@chuahou.dev>
+
+ghc-options: -Wall
+
+dependencies:
+    - base >= 4.13 && < 5
+
+executable:
+    main:        Main.hs
+    source-dirs: src
