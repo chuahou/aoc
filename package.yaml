@@ -19,6 +19,10 @@ default-extensions:
 dependencies:
     - base >= 4.13 && < 5
 
-executable:
-    main:        Main.hs
+library:
     source-dirs: src
+
+executable:
+    main:         Main.hs
+    source-dirs:  exe
+    dependencies: aoc
