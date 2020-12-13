@@ -26,6 +26,7 @@ executable aoc
       Paths_aoc
   hs-source-dirs:
       src
+  default-extensions: BangPatterns GADTs LambdaCase Safe TupleSections TypeOperators
   ghc-options: -Wall
   build-depends:
       base >=4.13 && <5

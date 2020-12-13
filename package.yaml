@@ -8,6 +8,14 @@ maintainer:  Chua Hou <human+github@chuahou.dev>
 
 ghc-options: -Wall
 
+default-extensions:
+    - BangPatterns
+    - GADTs
+    - LambdaCase
+    - Safe
+    - TupleSections
+    - TypeOperators
+
 dependencies:
     - base >= 4.13 && < 5
 
