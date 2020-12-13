@@ -73,6 +73,7 @@ library
   build-depends:
       array
     , base >=4.13 && <5
+    , parsec
     , template-haskell
   default-language: Haskell2010
 
