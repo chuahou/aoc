@@ -22,7 +22,6 @@ import           AOC.Solution
 type Value    = Integer
 type Mask     = NonEmpty MaskChar
 data MaskChar = X | M1 | M0 deriving Show
-data AddrChar = AX | A1 | A0 deriving Show
 data Write    = Write Mask Int Value deriving Show
 type Memory   = Map Int Value
 
@@ -39,21 +38,16 @@ applyMask m = (.&.) (complement l) . (.|.) h
         (h, l) = valMask m
 
 addrMask :: Mask -> Int -> [Int]
-addrMask m = nub . addrMask' . mask (NE.reverse m)
+addrMask m = nub . addrMask' (NE.reverse m)
     where
-        possible AX = [0, 1]
-        possible A0 = [0]
-        possible A1 = [1]
-        addrMask' (x:|[])   = possible x
-        addrMask' (x:|y:ys) = [ y' * 2 + x'
-                              | x' <- possible x
-                              , y' <- addrMask' (y:|ys)
-                              ]
-        mask (x:|[])   a = maskBit x a :| []
-        mask (x:|y:ys) a = maskBit x a :| NE.toList (mask (y:|ys) (a `div` 2))
-        maskBit X  _ = AX
-        maskBit M0 x = if x `mod` 2 == 1 then A1 else A0
-        maskBit M1 _ = A1
+        possible X  _ = [0, 1]
+        possible M0 a = if a `mod` 2 == 1 then [1] else [0]
+        possible M1 _ = [1]
+        addrMask' (x:|[])   a = possible x a
+        addrMask' (x:|y:ys) a = [ y' * 2 + x'
+                                | x' <- possible x a
+                                , y' <- addrMask' (y:|ys) (a `div` 2)
+                                ]
 
 applyWrite :: Write -> Memory -> Memory
 applyWrite (Write m addr val) = Map.insert addr (applyMask m val)
