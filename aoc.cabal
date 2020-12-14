@@ -77,11 +77,16 @@ library
       AOC.Parsec
       AOC.Solution
   other-modules:
+      AOC.Days.Day07.Lex
+      AOC.Days.Day07.Parse
       Paths_aoc
   hs-source-dirs:
       src
   default-extensions: BangPatterns GADTs LambdaCase TupleSections TypeOperators
   ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  build-tools:
+      alex >=3.2.5 && <3.3
+    , happy >=1.19.12 && <1.20
   build-depends:
       array >=0.5.4.0 && <0.6
     , base >=4.13 && <5
