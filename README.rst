@@ -6,11 +6,12 @@ Advent of Code 2020
 
 https://adventofcode.com/2020
 
-Days 1 to 13, with individual solution files, are found in the ``old/``
-folder.
+You can find individual days in `AOC.Days.Day* <src/AOC/Days/>`_ .
 
-Following days are implemented using the new project setup, with inputs
-in ``data/`` and solutions in ``src/AOCDay/``.
+Day 7 has not been migrated from the old format in ``old/`` due to
+ongoing
+`issues <https://stackoverflow.com/questions/65285789/cabal-tries-to-build-unknown-package-when-building-with-alex-happy-in-nix-shell>`_
+with building with alex/happy in nix-shell.
 
 .. |License: MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
 	:target: https://opensource.org/licenses/MIT
