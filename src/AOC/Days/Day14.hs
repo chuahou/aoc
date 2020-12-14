@@ -5,11 +5,12 @@ module AOC.Days.Day14 (solution) where
 
 import           Data.Bits          (complement, (.&.), (.|.))
 import           Data.Foldable      (foldl')
+import           Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import           Data.Map           (Map)
 import qualified Data.Map           as Map
-import           Data.Maybe         (fromMaybe)
-import           Text.Parsec        (digit, endOfLine, eof, many, many1, oneOf,
-                                     parse, string, try)
+import           Text.Parsec        (char, digit, endOfLine, eof, many1, string,
+                                     try, (<|>))
 import           Text.Parsec.String (Parser)
 import           Text.Read          (readMaybe)
 
@@ -17,15 +18,23 @@ import           AOC.Solution
 
 ----- SOLUTION -----
 
-type Value  = Integer
-data Mask   = Mask { maskHigh :: Integer
-                   , maskLow  :: Integer
-                   } deriving Show
-data Write  = Write Mask Int Value deriving Show
-type Memory = Map Int Value
+type Value    = Integer
+type Mask     = NonEmpty MaskChar
+data MaskChar = X | M1 | M0 deriving Show
+data Write    = Write Mask Int Value deriving Show
+type Memory   = Map Int Value
+
+valMask :: Mask -> (Integer, Integer)
+valMask = foldl' s (0, 0)
+    where
+        s (h, l) X  = (h * 2,     l * 2)
+        s (h, l) M1 = (h * 2 + 1, l * 2)
+        s (h, l) M0 = (h * 2,     l * 2 + 1)
 
 applyMask :: Mask -> Value -> Value
-applyMask (Mask h l) = (.&.) (complement l) . (.|.) h
+applyMask m = (.&.) (complement l) . (.|.) h
+    where
+        (h, l) = valMask m
 
 applyWrite :: Write -> Memory -> Memory
 applyWrite (Write m addr val) = Map.insert addr (applyMask m val)
@@ -33,16 +42,13 @@ applyWrite (Write m addr val) = Map.insert addr (applyMask m val)
 ----- PARSING -----
 
 maskP :: Parser Mask
-maskP =   try (string "mask = ") >> many (oneOf "01X")
-      >>= maybe (fail "toMask") return . toMask
-
-toMask :: [Char] -> Maybe Mask
-toMask = fmap (uncurry Mask) . foldl' s (Just (0, 0))
+maskP = try (string "mask = ") >> many1 maskCharP >>= toNonEmpty
     where
-        s (Just (h, l)) 'X' = Just (h * 2,     l * 2)
-        s (Just (h, l)) '1' = Just (h * 2 + 1, l * 2)
-        s (Just (h, l)) '0' = Just (h * 2,     l * 2 + 1)
-        s _             _   = Nothing
+        maskCharP =   (char 'X' >> return X)
+                  <|> (char '1' >> return M1)
+                  <|> (char '0' >> return M0)
+        toNonEmpty (x:xs) = return (x:|xs)
+        toNonEmpty []     = fail "toNonEmpty"
 
 writeP :: Parser (Int, Value)
 writeP = (,) <$> (try (string "mem[") *> intP <* string "] = ")
