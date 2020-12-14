@@ -9,20 +9,14 @@ module AOC.Solution ( (:=>) (Solution, Script)
                     ) where
 
 import           Data.Maybe         (fromMaybe)
-import           System.IO          (FilePath)
 import           System.Process     (callProcess)
 import qualified Text.Parsec        as P
 import           Text.Parsec.String (Parser)
 
 import           Paths_aoc
 
-data a :=> b where
-    Solution :: { parse    :: String -> Maybe a
-                , part1    :: a -> b
-                , part2    :: a -> b
-                , printSol :: b -> String
-                } -> a :=> b
-    Script :: FilePath -> a :=> b
+data a :=> b = Solution (String -> Maybe a) (a -> b) (a -> b) (b -> String)
+             | Script FilePath
 
 simpleSolution :: Show b
                => (String -> Maybe a) -> (a -> b) -> (a -> b) -> a :=> b
