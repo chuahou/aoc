@@ -1,0 +1,41 @@
+name:        aoc
+version:     0.1.0.0
+synopsis:    Advent of Code 2020 solutions
+description: My solutions for Advent of Code 2020, primarily in Haskell.
+category:    hmm
+github:      chuahou/aoc
+maintainer:  Chua Hou <human+github@chuahou.dev>
+
+ghc-options:
+    - -Wall
+    - -fwarn-incomplete-uni-patterns
+    - -fwarn-incomplete-record-updates
+
+default-extensions:
+    - BangPatterns
+    - GADTs
+    - LambdaCase
+    - TupleSections
+    - TypeOperators
+
+dependencies:
+    - base >= 4.13 && < 5
+
+data-files:
+    - input/day*.txt
+    - scripts/*.sh
+
+library:
+    source-dirs: src
+    dependencies:
+        - array            ^>= 0.5.4.0
+        - containers       ^>= 0.6.2.1
+        - parsec           ^>= 3.1.14.0
+        - template-haskell ^>= 2.16.0.0
+        - process          ^>= 1.6.9.0
+
+executable:
+    main:         Main.hs
+    source-dirs:  exe
+    dependencies:
+        - aoc

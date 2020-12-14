@@ -1,0 +1,95 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           aoc
+version:        0.1.0.0
+synopsis:       Advent of Code 2020 solutions
+description:    My solutions for Advent of Code 2020, primarily in Haskell.
+category:       hmm
+homepage:       https://github.com/chuahou/aoc#readme
+bug-reports:    https://github.com/chuahou/aoc/issues
+maintainer:     Chua Hou <human+github@chuahou.dev>
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+data-files:
+    input/day01.txt
+    input/day02.txt
+    input/day03.txt
+    input/day04.txt
+    input/day05.txt
+    input/day06.txt
+    input/day07.txt
+    input/day08.txt
+    input/day09.txt
+    input/day10.txt
+    input/day11.txt
+    input/day12.txt
+    input/day13.txt
+    scripts/day04.sh
+    scripts/day06part1.sh
+
+source-repository head
+  type: git
+  location: https://github.com/chuahou/aoc
+
+library
+  exposed-modules:
+      AOC
+      AOC.Days
+      AOC.Days.Day01
+      AOC.Days.Day02
+      AOC.Days.Day03
+      AOC.Days.Day04
+      AOC.Days.Day05
+      AOC.Days.Day06
+      AOC.Days.Day07
+      AOC.Days.Day08
+      AOC.Days.Day09
+      AOC.Days.Day10
+      AOC.Days.Day11
+      AOC.Days.Day12
+      AOC.Days.Day13
+      AOC.Days.Day14
+      AOC.Days.Day15
+      AOC.Days.Day16
+      AOC.Days.Day17
+      AOC.Days.Day18
+      AOC.Days.Day19
+      AOC.Days.Day20
+      AOC.Days.Day21
+      AOC.Days.Day22
+      AOC.Days.Day23
+      AOC.Days.Day24
+      AOC.Days.Day25
+      AOC.Solution
+  other-modules:
+      Paths_aoc
+  hs-source-dirs:
+      src
+  default-extensions: BangPatterns GADTs LambdaCase TupleSections TypeOperators
+  ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  build-depends:
+      array >=0.5.4.0 && <0.6
+    , base >=4.13 && <5
+    , containers >=0.6.2.1 && <0.7
+    , parsec >=3.1.14.0 && <3.2
+    , process >=1.6.9.0 && <1.7
+    , template-haskell >=2.16.0.0 && <2.17
+  default-language: Haskell2010
+
+executable aoc
+  main-is: Main.hs
+  other-modules:
+      Paths_aoc
+  hs-source-dirs:
+      exe
+  default-extensions: BangPatterns GADTs LambdaCase TupleSections TypeOperators
+  ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  build-depends:
+      aoc
+    , base >=4.13 && <5
+  default-language: Haskell2010

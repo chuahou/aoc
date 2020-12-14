@@ -1,6 +1,10 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 
+module AOC.Days.Day06 (solution) where
+
+import           AOC.Solution
+
 group :: String -> [String]
 group = group' ""
 
@@ -13,5 +17,9 @@ count :: [String] -> Int
 count (cs:css) = length . foldr (filter . flip elem) cs $ css
 count []       = 0
 
-main :: IO ()
-main = readFile "input" >>= print . sum . map (count . lines) . group
+solution :: String :=> String
+solution = Solution
+    Just
+    (const "Run script scripts/day06part1.sh directly")
+    (show . sum . map (count . lines) . group)
+    id
