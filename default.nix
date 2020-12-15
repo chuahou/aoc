@@ -13,5 +13,6 @@ pkgs.haskellPackages.developPackage {
     pkgs.haskell.lib.addBuildTools drv [
       pkgs.haskellPackages.cabal-install
       pkgs.haskellPackages.haskell-language-server
+      pkgs.haskellPackages.stylish-haskell
     ];
 }
