@@ -1,9 +1,17 @@
 { pkgs ? import ./nix/nixpkgs.nix {} }:
 
-let pkg = pkgs.haskellPackages.callCabal2nix "aoc" ./. {};
-in pkgs.haskell.lib.overrideCabal pkg (old: {
-  buildTools = (old.buildTools or []) ++ [
-    pkgs.haskellPackages.cabal-install
-    pkgs.haskellPackages.haskell-language-server
-  ];
-})
+pkgs.haskellPackages.developPackage {
+  root = ./.;
+  source-overrides = {
+    delude = builtins.fetchGit {
+      name = "delude-0.1.0.1";
+      url  = "https://github.com/chuahou/delude";
+      ref  = "refs/tags/v0.1.0.1";
+    };
+  };
+  modifier = drv:
+    pkgs.haskell.lib.addBuildTools drv [
+      pkgs.haskellPackages.cabal-install
+      pkgs.haskellPackages.haskell-language-server
+    ];
+}

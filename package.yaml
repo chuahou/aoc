@@ -34,6 +34,7 @@ library:
         - template-haskell ^>= 2.16.0.0
         - process          ^>= 1.6.9.0
         - vector           ^>= 0.12.1.2
+        - delude
 
 executable:
     main:         Main.hs
