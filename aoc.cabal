@@ -29,6 +29,8 @@ data-files:
     input/day11.txt
     input/day12.txt
     input/day13.txt
+    input/day14.txt
+    input/day15.txt
     scripts/day04.sh
     scripts/day06part1.sh
 
