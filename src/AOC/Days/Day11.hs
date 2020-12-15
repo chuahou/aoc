@@ -3,6 +3,8 @@
 
 module AOC.Days.Day11 (solution) where
 
+import           Prelude         hiding ((!?))
+
 import           Data.Map        (Map, (!?))
 import qualified Data.Map.Strict as Map
 import           Data.Maybe      (mapMaybe)

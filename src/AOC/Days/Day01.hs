@@ -5,7 +5,6 @@ module AOC.Days.Day01 (solution) where
 
 import           Control.Applicative ((<|>))
 import           Data.List           (sort)
-import           Text.Read           (readMaybe)
 
 import           AOC.Solution
 

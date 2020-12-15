@@ -10,7 +10,6 @@ module AOC.Parsec ( module Text.Parsec
 import           Data.List.NonEmpty (NonEmpty (..))
 import           Text.Parsec
 import           Text.Parsec.String (Parser)
-import           Text.Read          (readMaybe)
 
 readP :: Read a => Parser String -> Parser a
 readP = ((\cs -> case readMaybe cs of

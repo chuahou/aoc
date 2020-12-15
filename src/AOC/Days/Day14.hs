@@ -4,7 +4,6 @@
 module AOC.Days.Day14 (solution) where
 
 import           Data.Bits          (complement, (.&.), (.|.))
-import           Data.Foldable      (foldl')
 import           Data.List          (nub)
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
@@ -13,7 +12,6 @@ import qualified Data.Map           as Map
 import           Text.Parsec        (char, digit, endOfLine, eof, many1, string,
                                      try, (<|>))
 import           Text.Parsec.String (Parser)
-import           Text.Read          (readMaybe)
 
 import           AOC.Solution
 

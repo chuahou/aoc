@@ -19,7 +19,12 @@ default-extensions:
     - TypeOperators
 
 dependencies:
-    - base >= 4.13 && < 5
+    - name:    base
+      version: ">= 4.13 && < 5"
+      mixin:   hiding (Prelude)
+    - name:    delude
+      version: "^>= 0.1.0.2"
+      mixin:   (Delude as Prelude)
 
 data-files:
     - input/day*.txt
@@ -34,7 +39,6 @@ library:
         - template-haskell ^>= 2.16.0.0
         - process          ^>= 1.6.9.0
         - vector           ^>= 0.12.1.2
-        - delude
 
 executable:
     main:         Main.hs

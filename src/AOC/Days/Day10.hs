@@ -7,7 +7,6 @@ import           Control.Monad      ((>=>))
 import           Data.List          (sort)
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
-import           Text.Read          (readMaybe)
 
 import           AOC.Solution
 

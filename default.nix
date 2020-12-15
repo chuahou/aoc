@@ -4,9 +4,9 @@ pkgs.haskellPackages.developPackage {
   root = ./.;
   source-overrides = {
     delude = builtins.fetchGit {
-      name = "delude-0.1.0.1";
+      name = "delude-0.1.0.2";
       url  = "https://github.com/chuahou/delude";
-      ref  = "refs/tags/v0.1.0.1";
+      ref  = "refs/tags/v0.1.0.2";
     };
   };
   modifier = drv:

@@ -5,7 +5,6 @@ module Main where
 
 import           Data.Maybe         (fromMaybe)
 import           System.Environment (getArgs)
-import           Text.Read          (readMaybe)
 
 import           AOC                (getDay)
 import           AOC.Days           (formatDay)

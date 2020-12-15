@@ -3,10 +3,8 @@
 
 module AOC.Days.Day12 (solution) where
 
-import           Data.Foldable      (foldl')
 import qualified Text.Parsec        as P
 import           Text.Parsec.String (Parser)
-import           Text.Read          (readMaybe)
 
 import           AOC.Solution
 

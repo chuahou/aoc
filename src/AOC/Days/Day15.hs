@@ -1,11 +1,7 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 
-{-# LANGUAGE NoImplicitPrelude #-}
-
 module AOC.Days.Day15 (solution) where
-
-import           Delude
 
 import           Control.Monad               (forM_)
 import           Control.Monad.ST

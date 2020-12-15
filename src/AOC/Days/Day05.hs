@@ -4,7 +4,6 @@
 module AOC.Days.Day05 (solution) where
 
 import           Data.List    (sort)
-import           Data.Maybe   (fromMaybe)
 
 import           AOC.Solution
 
@@ -15,7 +14,6 @@ parse :: Pass -> Maybe SeatId
 parse ps = let (rowStr, colStr) = splitAt 7 ps
                (row, col) = (toInt 'B' 'F' rowStr, toInt 'R' 'L' colStr)
             in (,) <$> row <*> col >>= \(row', col') -> return $ row' * 8 + col'
-            -- row * 8 + col
 
 toInt :: Char -> Char -> [Char] -> Maybe Int
 toInt high low = foldl (flip s) (Just 0)
@@ -23,10 +21,10 @@ toInt high low = foldl (flip s) (Just 0)
               | x == low  = fmap (*2)
               | otherwise = const Nothing
 
-solution :: [SeatId] :=> SeatId
+solution :: [SeatId] :=> Maybe SeatId
 solution = simpleSolution
     (mapM parse . lines)
     maximum
     (let find (x:y:ys) = if x + 2 == y then Just (x + 1) else find (y:ys)
          find _        = Nothing
-      in fromMaybe (error "Could not find seat") . find . sort)
+      in find . sort)
