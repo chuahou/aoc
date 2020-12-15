@@ -3,12 +3,12 @@
 
 module AOC.Days.Day15 (solution) where
 
-import           Control.Monad       (forM_)
+import           Control.Monad               (forM_)
 import           Control.Monad.ST
-import           Data.Foldable       (foldlM)
-import           Data.List.NonEmpty  (NonEmpty (..))
-import qualified Data.List.NonEmpty  as NE
-import qualified Data.Vector.Mutable as VM
+import           Data.Foldable               (foldlM)
+import           Data.List.NonEmpty          (NonEmpty (..))
+import qualified Data.List.NonEmpty          as NE
+import qualified Data.Vector.Unboxed.Mutable as VM
 
 import           AOC.Parsec
 import           AOC.Solution
