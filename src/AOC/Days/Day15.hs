@@ -3,34 +3,36 @@
 
 module AOC.Days.Day15 (solution) where
 
+import           Data.IntMap.Strict (IntMap)
+import qualified Data.IntMap.Strict as Map
 import           Data.List.NonEmpty (NonEmpty (..))
-import           Data.Map           (Map)
-import qualified Data.Map           as Map
+import qualified Data.List.NonEmpty as NE
 
 import           AOC.Parsec
 import           AOC.Solution
 
-(!?) :: [a] -> Int -> Maybe a
-(x:_)  !? 0 = Just x
-(_:xs) !? n = if n < 0 then Nothing else xs !? (n - 1)
-[]     !? _ = Nothing
-
-genNums :: NonEmpty Int -> [Int]
-genNums input = genInput input Map.empty 0
+genNums :: NonEmpty Int -> Int -> Maybe Int
+genNums input target
+    | target <= 0                   = Nothing
+    | target <= NE.length input     = Just $ input NE.!! (target - 1)
+    | target == NE.length input + 1 = Just 0
+    | otherwise                     = Just $ genInput input Map.empty 1
     where
-        genInput (x:|y:ys) m i = x : genInput (y:|ys) (Map.insert x i m) (i + 1)
-        genInput (x:|[])   m i = x : 0 : genNums' (Map.insert x i m) (i + 1) 0
+        genInput (x:|y:ys) m i = genInput (y:|ys) (Map.insert x i m) (i + 1)
+        genInput (x:|[])   m i = genNums' (Map.insert x i m) (i + 1) 0 target
 
--- @genNums' m i prev@ generates everything after the @i@th element, where
--- @prev@ is the @i@th element and @m@ contains the last spoken of each number
--- before the @i@th element.
-genNums' :: Map Int Int -> Int -> Int -> [Int]
-genNums' m i prev = next : genNums' (Map.insert prev i m) (i + 1) next
+-- @genNums' m i prev@ calculates the @i+1@th element, where @prev@ is the @i@th
+-- element and @m@ contains the last spoken of each number before the @i@th
+-- element. It returns the previous element when @i == target@.
+genNums' :: IntMap Int -> Int -> Int -> Int -> Int
+genNums' !m !i !prev target
+    | i == target = prev
+    | otherwise   = genNums' (Map.insert prev i m) (i + 1) next target
     where
         next = maybe 0 (i -) $ Map.lookup prev m
 
 solution :: NonEmpty Int :=> Maybe Int
 solution = simpleSolution
     (fromParsec $ nonEmptyP $ sepBy1 (readP (many1 digit)) (char ','))
-    ((!? 2019) . genNums)
-    undefined -- part2
+    (`genNums` 2020)
+    (`genNums` 30000000)
