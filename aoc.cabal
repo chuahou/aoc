@@ -65,6 +65,7 @@ library
       AOC.Days.Day23
       AOC.Days.Day24
       AOC.Days.Day25
+      AOC.Parsec
       AOC.Solution
   other-modules:
       Paths_aoc

@@ -8,10 +8,10 @@ module AOC.Solution ( (:=>) (Solution, Script)
                     , test
                     ) where
 
-import           Data.Maybe         (fromMaybe)
-import           System.Process     (callProcess)
-import qualified Text.Parsec        as P
-import           Text.Parsec.String (Parser)
+import           Data.Maybe     (fromMaybe)
+import           System.Process (callProcess)
+
+import           AOC.Parsec
 
 import           Paths_aoc
 
@@ -28,7 +28,7 @@ runSolution (Solution p p1 p2 ps) x = p x >>= \x' ->
 runSolution (Script s) _ = Just $ getDataFileName s >>= flip callProcess []
 
 fromParsec :: Parser a -> (String -> Maybe a)
-fromParsec p = either (const Nothing) Just . P.parse p ""
+fromParsec p = either (const Nothing) Just . parse p ""
 
 test :: a :=> b -> FilePath -> IO ()
 test s f = readFile f >>= fromMaybe (fail "Failed to run") . runSolution s
