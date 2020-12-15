@@ -1,7 +1,11 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module AOC.Days.Day15 (solution) where
+
+import           Delude
 
 import           Control.Monad               (forM_)
 import           Control.Monad.ST
@@ -17,12 +21,14 @@ run :: NonEmpty Int -> Int -> Maybe Int
 run input target
     | target <= 0            = Nothing
     | target <= length input = Just $ input NE.!! (target - 1)
-    | otherwise = let len = length input
-                   in Just $ runST $ do
-        { v <- VM.replicate (maximum (target : NE.toList input) + 1) 0
-        ; forM_ (zip (NE.init input) [1..]) $ uncurry (VM.write v)
-        ; foldlM (speakNum v) (NE.last input) [len..target-1]
-        }
+    | otherwise =
+        let len = length input
+         in ((+1) <$> maximum (target : NE.toList input))
+         >>= \size -> Just $ runST $ do
+            { v <- VM.replicate size 0
+            ; forM_ (zip (NE.init input) [1..]) $ uncurry (VM.write v)
+            ; foldlM (speakNum v) (NE.last input) [len..target-1]
+            }
 
 speakNum :: VM.MVector s Int -> Int -> Int -> ST s Int
 speakNum !v !prev i = do
