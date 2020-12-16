@@ -5,11 +5,13 @@ module AOC.Parsec ( module Text.Parsec
                   , module Text.Parsec.String
                   , readP
                   , nonEmptyP
+                  , (<|>)
                   ) where
 
-import           Data.List.NonEmpty (NonEmpty (..))
-import           Text.Parsec
-import           Text.Parsec.String (Parser)
+import           Control.Applicative ((<|>))
+import           Data.List.NonEmpty  (NonEmpty (..))
+import           Text.Parsec         hiding ((<|>))
+import           Text.Parsec.String  (Parser)
 
 readP :: Read a => Parser String -> Parser a
 readP = ((\cs -> case readMaybe cs of
