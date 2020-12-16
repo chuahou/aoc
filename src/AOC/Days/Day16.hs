@@ -3,7 +3,9 @@
 
 module AOC.Days.Day16 (solution) where
 
-import           Data.List    (sortOn)
+import           Data.Bifunctor (first)
+import           Data.Functor   ((<&>))
+import           Data.List      (sortOn)
 
 import           AOC.Parsec
 import           AOC.Solution
@@ -15,6 +17,35 @@ type Ticket = [Int]
 
 invalidValues :: Ticket -> [Range] -> [Int]
 invalidValues ts rs = filter (not . flip inRanges (mergeRanges rs)) ts
+
+idFields :: [Ticket] -> [Field] -> Maybe [(Int, Field)]
+idFields tss fs
+    | all ((== length fs) . length) tss = assign . sortOn (length . fst)
+                                        $ zip (map valid fs) fs
+    | otherwise                         = Nothing -- length mismatch
+    where
+        -- remove invalid tickets
+        tss' = filter (null . (`invalidValues` concatMap ranges fs)) tss
+
+        -- check possible positions for each field
+        valid :: Field -> [Int]
+        valid f = filter (validPos f) [0..length fs - 1]
+        validPos f pos = case mapM (!? pos) tss' of
+                           Just xs -> all (`inRanges` ranges f) xs
+                           Nothing -> False
+
+        -- assign field positions based on possible positions
+        assign :: [([Int], Field)] -> Maybe [(Int, Field)]
+        assign []         = Just [] -- assigned all
+        assign (([],_):_) = Nothing -- ran out of possibilities
+        assign ((x:xs, f):ys) =   (((x, f):) <$> assign ys')
+                              <|> assign ((xs, f):ys)
+            where
+                ys' = map (first $ filter (/= x)) ys -- remove choice from rest
+
+getDepartureValues :: Ticket -> [(Int, Field)] -> Maybe [Int]
+getDepartureValues t fs = mapM ((t !?) . fst)
+                        $ filter ((== "departure") . take 9 . name . snd) fs
 
 ----- RANGE -----
 
@@ -58,9 +89,10 @@ ticketP = sepBy1 (readP (many1 digit)) (char ',')
 
 ----- SKELETON ------
 
-solution :: Input :=> Int
+solution :: Input :=> Maybe Int
 solution = simpleSolution
     (fromParsec inputP)
     (\(Input fs _ ts) ->
-        sum . concatMap (`invalidValues` concatMap ranges fs) $ ts)
-    undefined -- part2
+        Just . sum . concatMap (`invalidValues` concatMap ranges fs) $ ts)
+    (\(Input fs t ts) ->
+        idFields ts fs >>= getDepartureValues t <&> product)
