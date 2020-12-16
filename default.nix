@@ -1,4 +1,4 @@
-{ pkgs ? import ./nix/nixpkgs.nix {} }:
+{ pkgs ? import ./nix/nixpkgs.nix {}, shellEnv ? false }:
 
 pkgs.haskellPackages.developPackage {
   root = ./.;
@@ -15,4 +15,5 @@ pkgs.haskellPackages.developPackage {
       pkgs.haskellPackages.haskell-language-server
       pkgs.haskellPackages.stylish-haskell
     ];
+  returnShellEnv = shellEnv;
 }
