@@ -8,32 +8,47 @@ import qualified Data.Set     as Set
 
 import           AOC.Solution
 
-type Pos  = (Int, Int, Int)
-type Grid = Set Pos
+type Pos3 = (Int, Int, Int)
+type Pos4 = (Int, Int, Int, Int)
+type Grid = Set
 
-neighbours :: Pos -> Set Pos
-neighbours (x, y, z) = Set.fromList [ (x', y', z')
-                                    | x' <- [x-1 .. x+1]
-                                    , y' <- [y-1 .. y+1]
-                                    , z' <- [z-1 .. z+1]
-                                    , x' /= x || y' /= y || z' /= z
-                                    ]
+neighbours3 :: Pos3 -> Set Pos3
+neighbours3 (x, y, z) = Set.fromList
+    [ (x', y', z')
+    | x' <- [x-1 .. x+1]
+    , y' <- [y-1 .. y+1]
+    , z' <- [z-1 .. z+1]
+    , x' /= x || y' /= y || z' /= z
+    ]
 
-activeNeighbours :: Pos -> Grid -> Int
-activeNeighbours p g = Set.size $ neighbours p `Set.intersection` g
+neighbours4 :: Pos4 -> Set Pos4
+neighbours4 (x, y, z, w) = Set.fromList
+    [ (x', y', z', w')
+    | x' <- [x-1 .. x+1]
+    , y' <- [y-1 .. y+1]
+    , z' <- [z-1 .. z+1]
+    , w' <- [w-1 .. w+1]
+    , x' /= x || y' /= y || z' /= z || w' /= w
+    ]
 
-killSet :: Grid -> Set Pos
-killSet g = Set.filter (\p -> let n = activeNeighbours p g
-                               in n /= 2 && n /= 3) g
+activeNeighbours :: Ord a => (a -> Set a) -> a -> Grid a -> Int
+activeNeighbours f p g = Set.size $ f p `Set.intersection` g
 
-genSet :: Grid -> Set Pos
-genSet g = let ns = Set.unions $ Set.map neighbours g
-            in Set.filter (\p -> activeNeighbours p g == 3) ns
+killSet :: Ord a => (a -> Set a) -> Grid a -> Set a
+killSet f g = Set.filter (\p -> let n = activeNeighbours f p g
+                                 in n /= 2 && n /= 3) g
 
-genKill :: Grid -> Grid
-genKill g = (g `Set.union` genSet g) Set.\\ killSet g
+genSet :: Ord a => (a -> Set a) -> Grid a -> Set a
+genSet f g = let ns = Set.unions $ Set.map f g
+              in Set.filter (\p -> activeNeighbours f p g == 3) ns
 
-parse :: String -> Maybe Grid
+genKill :: Ord a => (a -> Set a) -> Grid a -> Grid a
+genKill f g = (g `Set.union` genSet f g) Set.\\ killSet f g
+
+expandDim :: Grid Pos3 -> Grid Pos4
+expandDim = Set.map (\(x, y, z) -> (x, y, z, 0))
+
+parse :: String -> Maybe (Grid Pos3)
 parse = foldr lineP (Just Set.empty) . zip [0..] . lines
     where
         lineP (x, cs) g = foldr (charP x) g . zip [0..] $ cs
@@ -41,8 +56,8 @@ parse = foldr lineP (Just Set.empty) . zip [0..] . lines
         charP x (y, '#') g = Set.insert (x, y, 0) <$> g
         charP _ _        _ = Nothing
 
-solution :: Grid :=> Int
+solution :: Grid Pos3 :=> Int
 solution = simpleSolution
     parse
-    (Set.size . (!! 6) . iterate genKill)
-    undefined -- part2
+    (Set.size . (!! 6) . iterate (genKill neighbours3))
+    (Set.size . (!! 6) . iterate (genKill neighbours4) . expandDim)
