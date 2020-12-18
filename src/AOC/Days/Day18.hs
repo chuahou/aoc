@@ -11,7 +11,7 @@ import           AOC.Solution
 data Expr = Atom Int | Add Expr Expr | Times Expr Expr deriving Show
 
 wsP :: Parser ()
-wsP = void $ many (char ' ' <|> endOfLine)
+wsP = void $ many (char ' ')
 
 exprP :: Parser Expr
 exprP = chainl1 (termP <* wsP) (opP <* wsP)
@@ -20,13 +20,22 @@ exprP = chainl1 (termP <* wsP) (opP <* wsP)
               <|> char '(' *> exprP <* char ')'
         opP = (char '*' >> return Times) <|> (char '+' >> return Add)
 
+exprP' :: Parser Expr
+exprP' = chainl1 termP mulP
+    where
+        termP = chainl1 factorP addP <* wsP
+        factorP =   Atom <$> readP (many1 digit)  <* wsP
+                <|> char '(' *> exprP' <* char ')' <* wsP
+        addP = char '+' <* wsP >> return Add
+        mulP = char '*' <* wsP >> return Times
+
 eval :: Expr -> Int
 eval (Atom x)    = x
 eval (Add x y)   = eval x + eval y
 eval (Times x y) = eval x * eval y
 
-solution :: [Expr] :=> Int
+solution :: String :=> Maybe Int
 solution = simpleSolution
-    (fromParsec $ many exprP)
-    (sum . map eval)
-    undefined -- part2
+    Just
+    (fmap (sum . map eval) . fromParsec (endBy1 exprP  endOfLine))
+    (fmap (sum . map eval) . fromParsec (endBy1 exprP' endOfLine))
