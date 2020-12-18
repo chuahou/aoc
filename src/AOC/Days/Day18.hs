@@ -10,24 +10,24 @@ import           AOC.Solution
 
 data Expr = Atom Int | Add Expr Expr | Times Expr Expr deriving Show
 
-wsP :: Parser ()
-wsP = void $ many (char ' ')
+lexeme :: Parser a -> Parser a
+lexeme = (<* many (char ' '))
 
 exprP :: Parser Expr
-exprP = chainl1 (termP <* wsP) (opP <* wsP)
+exprP = chainl1 (lexeme termP) (lexeme opP)
     where
         termP =   Atom <$> readP (many1 digit)
               <|> char '(' *> exprP <* char ')'
         opP = (char '*' >> return Times) <|> (char '+' >> return Add)
 
 exprP' :: Parser Expr
-exprP' = chainl1 termP mulP
+exprP' = chainl1 (lexeme termP) (lexeme mulP)
     where
-        termP = chainl1 factorP addP <* wsP
-        factorP =   Atom <$> readP (many1 digit)  <* wsP
-                <|> char '(' *> exprP' <* char ')' <* wsP
-        addP = char '+' <* wsP >> return Add
-        mulP = char '*' <* wsP >> return Times
+        termP = chainl1 (lexeme factorP) (lexeme addP)
+        factorP =   Atom <$> readP (many1 digit)
+                <|> char '(' *> exprP' <* char ')'
+        addP = char '+' >> return Add
+        mulP = char '*' >> return Times
 
 eval :: Expr -> Int
 eval (Atom x)    = x
