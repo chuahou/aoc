@@ -24,15 +24,23 @@ ruleParsers rs = IntMap.fromList . map mkParser $ rs
     where
         mkParser (Terminal    k c)   = (k, void $ char c)
         mkParser (NonTerminal k kss) = (k, choice . map (try . nonTermP) $ kss)
-        nonTermP ks = case mapM (`IntMap.lookup` ruleParsers rs) ks of
-                   Just ps -> sequence_ ps
-                   Nothing -> fail "invalid nonterminal"
+        nonTermP = mapM_ (`getRuleParser` ruleParsers rs)
 
-countMatching :: [Rule] -> [String] -> Maybe Int
-countMatching rs ss = do
-    { p <- 0 `IntMap.lookup` ruleParsers rs
-    ; return . length . filter (isRight . parse (p >> eof) "") $ ss
-    }
+getRuleParser :: RuleKey -> IntMap (Parser ()) -> Parser ()
+getRuleParser n = IntMap.findWithDefault (fail $ "no nonterminal " <> show n) n
+
+countMatching :: [Rule] -> [String] -> Int
+countMatching rs = length . filter (isRight . parse (p >> eof) "")
+    where
+        p = 0 `getRuleParser` ruleParsers rs
+
+countMatching' :: [Rule] -> [String] -> Int
+countMatching' rs = length . filter (isRight . parse (p >> eof) "")
+    where
+        p = do { y42 <- many1 (getRuleParser 42 $ ruleParsers rs)
+               ; y31 <- many1 (getRuleParser 31 $ ruleParsers rs)
+               ; if length y42 > length y31 then return () else fail "42 < 31"
+               }
 
 ----- PARSING -----
 
@@ -57,8 +65,8 @@ inputP = (,) <$> endBy1 ruleP endOfLine <* endOfLine
 
 ----- SKELETON -----
 
-solution :: ([Rule], [String]) :=> Maybe Int
+solution :: ([Rule], [String]) :=> Int
 solution = simpleSolution
     (fromParsec inputP)
     (uncurry countMatching)
-    undefined
+    (uncurry countMatching')
