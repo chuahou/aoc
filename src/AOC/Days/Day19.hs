@@ -41,6 +41,10 @@ countMatching' rs = length . filter (isRight . parse (p >> eof) "")
                ; y31 <- many1 (getRuleParser 31 $ ruleParsers rs)
                ; if length y42 > length y31 then return () else fail "42 < 31"
                }
+    -- assumes 0 -> 8 11
+    --         8 -> 42 | 42 8
+    --        11 -> 42 31 | 42 11 31
+    -- (which is true for this problem)
 
 ----- PARSING -----
 
