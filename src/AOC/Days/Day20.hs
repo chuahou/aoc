@@ -18,6 +18,7 @@ import           AOC.Solution
 data Tile     = Tile Int [[Cell]]
 data Cell     = Hash | Dot deriving Eq
 type Assembly = Map (Int, Int) Tile
+type Image    = Map (Int, Int) Cell
 
 instance Show Tile where
     show (Tile n cs) = unlines . ("Tile " <> show n :) . map (concatMap show) $ cs
@@ -65,6 +66,25 @@ assemble ts = go ts ts (0, 0) Map.empty
             where
                 border  = last t
                 border' = head t'
+
+assembleImage :: Assembly -> Image
+assembleImage = Map.foldrWithKey insertTile Map.empty
+    where
+        insertTile :: (Int, Int) -> Tile -> Image -> Image
+        insertTile (tx, ty) (Tile _ css) =
+            Map.union (Map.fromList . offset tx ty . coords . trim $ css)
+
+        offset :: Int -> Int -> [((Int, Int), Cell)] -> [((Int, Int), Cell)]
+        offset tx ty = map (\((x, y), c) -> ((x + tx * 8, y + ty * 8), c))
+
+        coords :: [[Cell]] -> [((Int, Int), Cell)]
+        coords = concatMap (uncurry (\i -> zipWith (\j -> ((j, i),)) [0..]))
+               . zip [0..]
+
+        trim :: [[Cell]] -> [[Cell]]
+        trim = trim' . map trim'
+            where
+                trim' = take 8 . drop 1
 
 ----- PARSING -----
 
