@@ -3,8 +3,6 @@
 
 module AOC.Days.Day18 (solution) where
 
-import           Control.Monad (void)
-
 import           AOC.Parsec
 import           AOC.Solution
 
