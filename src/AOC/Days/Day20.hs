@@ -3,18 +3,68 @@
 
 module AOC.Days.Day20 (solution) where
 
+import           Control.Monad ((>=>))
+import           Data.Foldable (asum)
+import           Data.List     (transpose, (\\))
+import           Data.Map      (Map)
+import qualified Data.Map      as Map
+import           Data.Maybe    (isJust)
+
 import           AOC.Parsec
 import           AOC.Solution
 
 ----- SOLUTION -----
 
--- borders are E, S, W, N, with left-to-right in list = clockwise
-data Tile   = Tile Int [[Cell]] deriving Show
-data Cell   = Hash | Dot deriving Eq
+data Tile     = Tile Int [[Cell]]
+data Cell     = Hash | Dot deriving Eq
+type Assembly = Map (Int, Int) Tile
+
+instance Show Tile where
+    show (Tile n cs) = unlines . ("Tile " <> show n :) . map (concatMap show) $ cs
+
+instance Eq Tile where
+    Tile x _ == Tile y _ = x == y
 
 instance Show Cell where
     show Hash = "#"
     show Dot  = "."
+
+assemble :: [Tile] -> Maybe Assembly
+assemble ts = go ts ts (0, 0) Map.empty
+    where
+        go :: [Tile] -> [Tile] -> (Int, Int) -> Assembly -> Maybe Assembly
+        go []      _         _ placed = Just placed
+        go _       []        _ _      = Nothing
+        go toPlace (t:toTry) (x, y) placed =
+            let addable      = filter canAdd $ tileTransforms t
+                canAdd t'    =  checkRel (`canAddRight` t') (x - 1, y)
+                             && checkRel (`canAddBelow` t') (x, y - 1)
+                checkRel f p = maybe True f $ placed Map.!? p
+                toPlace'     = toPlace \\ [t]
+                nextPos | x == 11   = (0, y + 1)
+                        | otherwise = (x + 1, y)
+             in (asum . map (\t' -> go toPlace' toPlace' nextPos
+                                       (Map.insert (x, y) t' placed)) $ addable)
+             <|> go toPlace toTry (x, y) placed
+
+        tileTransforms :: Tile -> [Tile]
+        tileTransforms (Tile i cs) = map (Tile i) $ rots ++ map flip' rots
+            where
+                rotate = map reverse . transpose
+                flip'  = map reverse
+                rots   = take 4 . iterate rotate $ cs
+
+        canAddRight :: Tile -> Tile -> Bool
+        canAddRight (Tile _ t) (Tile _ t') = border == border' && isJust border
+            where
+                border  = mapM last t
+                border' = mapM head t'
+
+        canAddBelow :: Tile -> Tile -> Bool
+        canAddBelow (Tile _ t) (Tile _ t') = border == border' && isJust border
+            where
+                border  = last t
+                border' = head t'
 
 ----- PARSING -----
 
@@ -30,8 +80,14 @@ tileP = do
 
 ----- SKELETON -----
 
-solution :: [Tile] :=> Maybe Int
+solution :: Assembly :=> Maybe Int
 solution = simpleSolution
-    (fromParsec (sepBy1 tileP endOfLine <* eof))
-    undefined -- part1
+    (fromParsec (sepBy1 tileP endOfLine <* eof) >=> assemble)
+    (fmap (product . map getId) . getCorners)
     undefined -- part2
+    where
+        getId (Tile x _) = x
+        getCorners as    = mapM (as Map.!?) [ (x, y)
+                                            | x <- [0, 11]
+                                            , y <- [0, 11]
+                                            ]
