@@ -5,7 +5,7 @@
 
 module AOC (getDay) where
 
-import           Data.Array     (bounds, (!))
+import           Data.Array     (bounds, inRange, (!))
 
 import           AOC.Days
 import qualified AOC.Days.Day01 as Day01
@@ -35,6 +35,7 @@ import qualified AOC.Days.Day24 as Day24
 import qualified AOC.Days.Day25 as Day25
 
 getDay :: Int -> Maybe (String -> Maybe (IO ()))
-getDay n = let solns  = $(daySolutions)
-               (a, b) = bounds solns
-            in if n < a || n > b then Nothing else Just $ solns ! n
+getDay n
+    | inRange (bounds solns) n = Just $ solns ! n
+    | otherwise                = Nothing
+    where solns = $(daySolutions)
