@@ -3,12 +3,13 @@
 
 module AOC.Days.Day19 (solution) where
 
-import           Control.Monad (void)
-import           Data.Either   (isRight)
-import           Data.IntMap   (IntMap)
-import qualified Data.IntMap   as IntMap
+import           Control.Monad                (void)
+import           Data.Bifunctor               (first)
+import           Data.IntMap                  (IntMap)
+import qualified Data.IntMap                  as IntMap
+import           Text.ParserCombinators.ReadP
 
-import           AOC.Parsec
+import qualified AOC.Parsec                   as P
 import           AOC.Solution
 
 ----- SOLUTION -----
@@ -19,53 +20,43 @@ data Rule = NonTerminal RuleKey [[RuleKey]]
 
 type RuleKey = Int
 
-ruleParsers :: [Rule] -> IntMap (Parser ())
+ruleParsers :: [Rule] -> IntMap (ReadP ())
 ruleParsers rs = IntMap.fromList . map mkParser $ rs
     where
         mkParser (Terminal    k c)   = (k, void $ char c)
-        mkParser (NonTerminal k kss) = (k, choice . map (try . nonTermP) $ kss)
+        mkParser (NonTerminal k kss) = (k, choice . map nonTermP $ kss)
         nonTermP = mapM_ (`getRuleParser` ruleParsers rs)
 
-getRuleParser :: RuleKey -> IntMap (Parser ()) -> Parser ()
-getRuleParser n = IntMap.findWithDefault (fail $ "no nonterminal " <> show n) n
+getRuleParser :: RuleKey -> IntMap (ReadP ()) -> ReadP ()
+getRuleParser = IntMap.findWithDefault pfail
 
 countMatching :: [Rule] -> [String] -> Int
-countMatching rs = length . filter (isRight . parse (p >> eof) "")
+countMatching rs = length . filter matches
     where
         p = 0 `getRuleParser` ruleParsers rs
-
-countMatching' :: [Rule] -> [String] -> Int
-countMatching' rs = length . filter (isRight . parse (p >> eof) "")
-    where
-        p = do { y42 <- many1 (getRuleParser 42 $ ruleParsers rs)
-               ; y31 <- many1 (getRuleParser 31 $ ruleParsers rs)
-               ; if length y42 > length y31 then return () else fail "42 < 31"
-               }
-    -- assumes 0 -> 8 11
-    --         8 -> 42 | 42 8
-    --        11 -> 42 31 | 42 11 31
-    -- (which is true for this problem)
+        matches = not . null . readP_to_S (p >> eof)
 
 ----- PARSING -----
 
-ruleKeyP :: Parser RuleKey
-ruleKeyP = readP (many1 digit)
+ruleKeyP :: P.Parser RuleKey
+ruleKeyP = P.readP (P.many1 P.digit)
 
-ruleP :: Parser Rule
-ruleP = do flip ($) <$> (ruleKeyP <* string ": ") <*> restP
+ruleP :: P.Parser Rule
+ruleP = flip ($) <$> (ruleKeyP <* P.string ": ") <*> restP
 
-restP :: Parser (RuleKey -> Rule)
-restP = try unionP <|> termP
+restP :: P.Parser (RuleKey -> Rule)
+restP = P.try unionP P.<|> termP
     where
-        unionP =   sepBy1 keysP (string " | ")
+        unionP =   P.sepBy1 keysP (P.string " | ")
                >>= \rs -> return (`NonTerminal` rs)
-        keysP  =   sepBy1 ruleKeyP (try $ char ' ' >> lookAhead ruleKeyP)
-        termP  =   (char '"' *> anyChar <* char '"')
+        keysP  =   P.sepBy1 ruleKeyP
+                            (P.try $ P.char ' ' >> P.lookAhead ruleKeyP)
+        termP  =   (P.char '"' *> P.anyChar <* P.char '"')
                >>= \c -> return (`Terminal` c)
 
-inputP :: Parser ([Rule], [String])
-inputP = (,) <$> endBy1 ruleP endOfLine <* endOfLine
-             <*> endBy1 (many $ noneOf "\n") endOfLine
+inputP :: P.Parser ([Rule], [String])
+inputP = (,) <$> P.endBy1 ruleP P.endOfLine <* P.endOfLine
+             <*> P.endBy1 (P.many $ P.noneOf "\n") P.endOfLine
 
 ----- SKELETON -----
 
@@ -73,4 +64,9 @@ solution :: ([Rule], [String]) :=> Int
 solution = simpleSolution
     (fromParsec inputP)
     (uncurry countMatching)
-    (uncurry countMatching')
+    (uncurry countMatching . first (map changeRule))
+    where
+        changeRule (NonTerminal 8  [[42]]) = NonTerminal 8 [[42], [42, 8]]
+        changeRule (NonTerminal 11 [[42, 31]]) =
+            NonTerminal 11 [[42, 31], [42, 11, 31]]
+        changeRule other = other
