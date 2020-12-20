@@ -30,6 +30,13 @@ instance Show Cell where
     show Hash = "#"
     show Dot  = "."
 
+cellTransforms :: [[Cell]] -> [[[Cell]]]
+cellTransforms css = rots ++ map flip' rots
+    where
+        rotate = map reverse . transpose
+        flip'  = map reverse
+        rots   = take 4 . iterate rotate $ css
+
 assemble :: [Tile] -> Maybe Assembly
 assemble ts = go ts ts (0, 0) Map.empty
     where
@@ -49,11 +56,7 @@ assemble ts = go ts ts (0, 0) Map.empty
              <|> go toPlace toTry (x, y) placed
 
         tileTransforms :: Tile -> [Tile]
-        tileTransforms (Tile i cs) = map (Tile i) $ rots ++ map flip' rots
-            where
-                rotate = map reverse . transpose
-                flip'  = map reverse
-                rots   = take 4 . iterate rotate $ cs
+        tileTransforms (Tile i css) = map (Tile i) . cellTransforms $ css
 
         canAddRight :: Tile -> Tile -> Bool
         canAddRight (Tile _ t) (Tile _ t') = border == border' && isJust border
@@ -77,14 +80,40 @@ assembleImage = Map.foldrWithKey insertTile Map.empty
         offset :: Int -> Int -> [((Int, Int), Cell)] -> [((Int, Int), Cell)]
         offset tx ty = map (\((x, y), c) -> ((x + tx * 8, y + ty * 8), c))
 
-        coords :: [[Cell]] -> [((Int, Int), Cell)]
-        coords = concatMap (uncurry (\i -> zipWith (\j -> ((j, i),)) [0..]))
-               . zip [0..]
-
         trim :: [[Cell]] -> [[Cell]]
         trim = trim' . map trim'
             where
                 trim' = take 8 . drop 1
+
+coords :: [[Cell]] -> [((Int, Int), Cell)]
+coords = concatMap (uncurry (\i -> zipWith (\j -> ((j, i),)) [0..]))
+       . zip [0..]
+
+monsters :: [[(Int, Int)]]
+monsters = map (map fst . filter ((== Hash) . snd) . coords)
+         . cellTransforms . map (map toCell) $
+            [ "                  # "
+            , "#    ##    ##    ###"
+            , " #  #  #  #  #  #   "
+            ]
+    where
+        toCell '#' = Hash
+        toCell _   = Dot
+
+matches :: Image -> (Int, Int) -> [(Int, Int)] -> Bool
+matches img (x, y) patt = isJust $ mapM_ (img Map.!?) [ (x + dx, y + dy)
+                                                      | (dx, dy) <- patt
+                                                      ]
+
+countMonsters :: Image -> Int
+countMonsters img = length hashes - 15 * numMonsters
+    where
+        hashes        = Map.filter (== Hash) img
+        numMonsters   = length . filter monsterAt $ [ (x, y)
+                                                    | x <- [0..95]
+                                                    , y <- [0..95]
+                                                    ]
+        monsterAt pos = any (matches hashes pos) monsters
 
 ----- PARSING -----
 
@@ -104,7 +133,7 @@ solution :: Assembly :=> Maybe Int
 solution = simpleSolution
     (fromParsec (sepBy1 tileP endOfLine <* eof) >=> assemble)
     (fmap (product . map getId) . getCorners)
-    undefined -- part2
+    (Just . countMonsters . assembleImage)
     where
         getId (Tile x _) = x
         getCorners as    = mapM (as Map.!?) [ (x, y)
