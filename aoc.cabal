@@ -87,7 +87,7 @@ library
     , delude >=0.1.0.2 && <0.2
     , parsec >=3.1.14.0 && <3.2
     , process >=1.6.9.0 && <1.7
-    , template-haskell >=2.16.0.0 && <2.17
+    , template-haskell >=2.15.0.0 && <2.16
     , vector >=0.12.1.2 && <0.13
   mixins:
       base hiding (Prelude)

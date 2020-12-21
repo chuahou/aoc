@@ -29,9 +29,9 @@ daySolutions = let xs = ListE . mapMaybe daySolution $ [1..25]
                 in return $ AppE
                     (AppE
                         (strVar "listArray")
-                        (TupE . map Just $ [ LitE (IntegerL 1)
-                                           , AppE (strVar "length") xs
-                                           ])) xs
+                        (TupE [ LitE (IntegerL 1)
+                              , AppE (strVar "length") xs
+                              ])) xs
     where
         daySolution n = formatDay n >>= \n' -> Just $
             AppE (strVar "runSolution") (strVar $ "Day" <> n' <> ".solution")
