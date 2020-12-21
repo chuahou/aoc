@@ -2,4 +2,4 @@
 
 builtins.deepSeq
   (builtins.readFile ./package.yaml)
-  (pkgs.haskellPackages.callCabal2nix "aoc" ./. {})
+  (pkgs.haskellPackages.callCabal2nix "aoc" (builtins.fetchGit ./.) {})
