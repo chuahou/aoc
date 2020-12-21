@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
 
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, CPP #-}
 
 module AOC (getDay) where
 
@@ -38,4 +38,11 @@ getDay :: Int -> Maybe (String -> Maybe (IO ()))
 getDay n
     | inRange (bounds solns) n = Just $ solns ! n
     | otherwise                = Nothing
-    where solns = $(daySolutions)
+    where
+        solns = -- TH causes nix's HLS to segfault for some reason, so this
+                -- brings the TH out of scope for ghcide
+#ifdef __GHCIDE__
+            undefined
+#else
+            $(daySolutions)
+#endif
