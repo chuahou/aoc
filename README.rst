@@ -16,4 +16,4 @@ with building with alex/happy in nix-shell.
 .. |License: MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
 	:target: https://opensource.org/licenses/MIT
 
-.. |Build status| build:: https://github.com/chuahou/aoc/workflows/nix%20test/badge.svg?branch=master
+.. |Build status| image:: https://github.com/chuahou/aoc/workflows/nix%20test/badge.svg?branch=master
