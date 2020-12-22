@@ -8,7 +8,7 @@ import           AOC.Solution
 
 import           Data.Bifunctor (bimap, second)
 import           Data.Char      (isAlpha)
-import           Data.List      (intersect, nub, sortOn, (\\))
+import           Data.List      (intercalate, intersect, nub, sortOn, (\\))
 import           Data.Maybe     (fromMaybe)
 
 ----- SOLUTION -----
@@ -39,6 +39,9 @@ noAllergens fs = case matchIngredients fs of
     where
         i `notIn` ms = i `notElem` concatMap (pure . snd) ms
 
+listDangerous :: [Food] -> Maybe [Ingredient]
+listDangerous = fmap (map snd . sortOn fst) . matchIngredients
+
 ----- PARSING -----
 
 inputP :: Parser [Food]
@@ -51,8 +54,8 @@ inputP = endBy1 foodP endOfLine
 
 ----- SKELETON -----
 
-solution :: [Food] :=> Maybe Int
+solution :: [Food] :=> Maybe String
 solution = simpleSolution
     (fromParsec inputP)
-    (fmap length . noAllergens)
-    undefined -- part2
+    (fmap (show . length) . noAllergens)
+    (fmap (intercalate ",") . listDangerous)
