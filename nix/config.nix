@@ -18,9 +18,7 @@
               rev  = "a4530367944e55dbbd1d127123f3519b7483bc54";
             }) {};
           in
-            pkgs.haskell-language-server.override {
-              supportedGhcVersions = [ "884" ];
-            };
+            pkgs.haskell-language-server;
       };
     };
   };
