@@ -10,4 +10,5 @@ let
 in
   builtins.deepSeq
     (builtins.readFile ./package.yaml)
-    (pkgs.haskellPackages.callCabal2nix "aoc" src {})
+    (pkgs.haskell.lib.dontHaddock
+      (pkgs.haskellPackages.callCabal2nix "aoc" src {}))
