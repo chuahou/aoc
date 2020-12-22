@@ -6,7 +6,7 @@ module AOC.Days.Day22 (solution) where
 import           AOC.Parsec
 import           AOC.Solution
 
-import           Data.Set     (empty, insert, member)
+import           Data.HashSet (empty, insert, member)
 
 ----- SOLUTION -----
 
@@ -32,7 +32,7 @@ runRecursiveGame = snd . go empty
         go prevs game@(c1:cs1, c2:cs2)
             | game `member` prevs = (Player1, c1:cs1)
             | length cs1 >= c1 && length cs2 >= c2 -- can recurse
-                = case go prevs (take c1 cs1, take c2 cs2) of
+                = case go empty (take c1 cs1, take c2 cs2) of
                     (Player1, _) -> go prevs win1
                     (Player2, _) -> go prevs win2
             | c1 >= c2  = go (game `insert` prevs) win1
