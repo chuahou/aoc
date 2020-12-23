@@ -42,7 +42,7 @@ solution :: [Int] :=> Maybe Int
 solution = simpleSolution
     (Just . map (read . pure) . filter (/= '\n'))
     (showGame . stepGame 9       100      <=< mkGame)
-    (getStars . stepGame 1000000 10000000 <=< mkGame . (<> [10..1000000]))
+    (getStars . stepGame 1000000 10000000 <=< mkGame')
     where
         showGame g = go (g V.!? 1) >>= readMaybe . concatMap show
             where
@@ -55,6 +55,19 @@ solution = simpleSolution
             ; s2 <- g V.!? s1
             ; return $ s1 * s2
             }
+        mkGame []     = Nothing
         mkGame (x:xs) = Just $ V.fromList . (x:) . map snd . sortOn fst
                       $ zip (x:xs) (xs <> [x])
-        mkGame []     = Nothing
+        mkGame' []       = Nothing
+        mkGame' xs@(x:_) = mkGame xs >>= \v -> last xs >>= \lastx ->
+                           Just $ runST $ do
+                            { v' <- V.thaw v >>= flip VM.grow (1000000 - 9)
+                            ; go v' lastx 10
+                            ; V.freeze v'
+                            }
+            where
+                go :: VM.MVector s Int -> Int -> Int -> ST s ()
+                go v curr next
+                    | curr == 1000000 =  VM.write v curr x
+                    | otherwise       =  VM.write v curr next
+                                      >> go v next (next + 1)
