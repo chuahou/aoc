@@ -33,14 +33,13 @@ stepGame (curr, p1, p2, p3, cups) = rotate $ tryDest (curr - 1)
                             (z:zs) -> go x (skipped <> [y], z:|zs)
                             []     -> tryDest $ x - 1
 
-solution :: Game :=> Game
-solution = Solution
+solution :: Game :=> Int
+solution = simpleSolution
     (mkGame . map (read . pure) . filter (/= '\n'))
-    ((!! 100) . iterate stepGame)
+    (showGame . (!! 100) . iterate stepGame)
     undefined -- part2
-    showGame
     where
         mkGame (a:b:c:d:e:fs) = Just (a, b, c, d, e:|fs)
         mkGame _              = Nothing
-        showGame (1, b, c, d, e:|fs) = concatMap show (b:c:d:e:fs)
+        showGame (1, b, c, d, e:|fs) = read $ concatMap show (b:c:d:e:fs)
         showGame g                   = showGame $ rotate g
