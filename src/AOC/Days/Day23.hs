@@ -4,36 +4,54 @@
 module AOC.Days.Day23 (solution) where
 
 import           AOC.Solution
+
 import           Control.Monad ((<=<))
-import           Data.List     (elemIndex)
+import           Data.List     (sortOn)
+import qualified Data.Vector   as V
 
-type Cup  = Int
-type Game = [Cup]
+-- 0th element is current cup; i-th element is the cup following the i-th cup
+type Game = V.Vector Int
 
-splitElem :: Eq a => a -> [a] -> Maybe ([a], [a])
-splitElem x xs =   elemIndex x xs
-               >>= \idx -> case splitAt idx xs of
-                             (bef, _:aft) -> Just (bef, aft)
-                             _            -> Nothing
-
-stepGame :: Int -> Game -> Maybe Game
-stepGame maxCup (curr:p1:p2:p3:rest) = go (curr - 1)
+stepGame :: Int -> Int -> Game -> Maybe Game
+stepGame _       0     g = Just g
+stepGame maxCups iters g = do
+    { curr     <- g V.!? 0
+    ; pick1    <- g V.!? curr
+    ; pick2    <- g V.!? pick1
+    ; pick3    <- g V.!? pick2
+    ; next     <- g V.!? pick3
+    ; let dest =  checkDest (curr - 1) [pick1, pick2, pick3]
+    ; dnext    <- g V.!? dest
+    ; let g'   = g V.// [ (curr,  next)
+                        , (pick3, dnext)
+                        , (dest,  pick1)
+                        , (0,     next)
+                        ]
+    ; stepGame maxCups (iters - 1) g'
+    }
     where
-        go x
-          | x < 1                 = go maxCup
-          | x `elem` [p1, p2, p3] = go (x - 1)
-          | otherwise             =   splitElem x rest
-                                  >>= \(bef, aft) ->
-                                      Just $ bef <> (x:p1:p2:p3:aft) <> [curr]
-stepGame _ _ = Nothing
+        checkDest x ps
+            | x <= 0      = checkDest maxCups ps
+            | x `elem` ps = checkDest (x - 1) ps
+            | otherwise   = x
 
-solution :: Game :=> Maybe Int
+solution :: [Int] :=> Maybe Int
 solution = simpleSolution
     (Just . map (read . pure) . filter (/= '\n'))
-    (showGame <=< (!? 100) . iterate' (stepGame 9))
-    undefined
-    where iterate' f x = case f x of
-                           Just x' -> x : iterate' f x'
-                           Nothing -> [x]
-          showGame g =   splitElem 1 g
-                     >>= \(bef, aft) -> readMaybe . concatMap show $ aft <> bef
+    (showGame <=< stepGame 9       100      <=< mkGame)
+    (getStars <=< stepGame 1000000 10000000 <=< mkGame . (<> [10..1000000]))
+    where
+        showGame g = go (g V.!? 1) >>= readMaybe . concatMap show
+            where
+                go x =   x >>= \x' -> g V.!? x'
+                     >>= \case
+                         1 -> Just [x']
+                         y -> (x':) <$> go (Just y)
+        getStars g = do
+            { s1 <- g V.!? 1
+            ; s2 <- g V.!? s1
+            ; return $ s1 * s2
+            }
+        mkGame (x:xs) = Just $ V.fromList . (x:) . map snd . sortOn fst
+                      $ zip (x:xs) (xs <> [x])
+        mkGame []     = Nothing
