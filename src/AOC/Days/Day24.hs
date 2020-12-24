@@ -6,6 +6,7 @@ module AOC.Days.Day24 (solution) where
 import           AOC.Parsec
 import           AOC.Solution
 
+import           Control.Monad      ((<=<))
 import           Data.Bifunctor     (bimap)
 import           Data.List          (sort)
 import qualified Data.List.NonEmpty as NE
@@ -35,11 +36,30 @@ instrP =   bimap sum sum . unzip <$> many go <* endOfLine
            <|> (char 'e' >> pure ( 1, 0))
            <|> (char 'w' >> pure (-1, 0))
 
-part1 :: [Instr] -> [(Int, Int)]
-part1 = map NE.head . filter (odd . length) . NE.group . sort
+initial :: [Instr] -> [(Int, Int)]
+initial = map NE.head . filter (odd . length) . NE.group . sort
 
-solution :: [Instr] :=> Int
+neighbours :: (Int, Int) -> [(Int, Int)]
+neighbours (x, y) = map (bimap (x+) (y+)) [ ( 1,  1)
+                                          , ( 0,  1)
+                                          , ( 0, -1)
+                                          , (-1, -1)
+                                          , ( 1,  0)
+                                          , (-1,  0)
+                                          ]
+
+step :: Hex -> Hex
+step h = (h `Set.union` gen) Set.\\ kill
+    where
+        allNeighbours = NE.group . sort . concat
+                      . Set.toList . Set.map neighbours $ h
+        gen   = (toSet . filter ((== 2) . length) $ allNeighbours) Set.\\ h
+        kill  = (h Set.\\ toSet allNeighbours)
+              `Set.union` (toSet . filter ((> 2) . length) $ allNeighbours)
+        toSet = Set.fromList . map NE.head
+
+solution :: Hex :=> Int
 solution = simpleSolution
-    (fromParsec $ many instrP)
-    (length . part1)
-    undefined -- part2
+    (Just . Set.fromList . initial <=< fromParsec (many instrP))
+    Set.size
+    (Set.size . (!! 100) . iterate step)
