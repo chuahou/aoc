@@ -33,11 +33,11 @@ dh g p pkA pkB = powMod pkB <$> skA
                 memo = IntMap.fromList
                      . flip zip [0..] . take m $ iterate (mulMod g) 1
                 gMulInv
-                    | gcd g p == 1 = Just $ (g `powMod` (p - 2)) `powMod` m
+                    | gcd g p == 1 = Just (g `powMod` (m * (p - 2)))
                     | otherwise    = Nothing
-                go inv y' i = case memo IntMap.!? y' of
-                                Just j  -> i * m + j
-                                Nothing -> go inv (y' `mulMod` inv) (i + 1)
+                go inv !y' i = case memo IntMap.!? y' of
+                                 Just j  -> i * m + j
+                                 Nothing -> go inv (y' `mulMod` inv) (i + 1)
 
 solution :: (Int, Int) :=> Maybe Int
 solution = simpleSolution
