@@ -21,7 +21,7 @@ solution = simpleSolution
     (fromParsec $ (,) <$> readP (many1 digit) <* endOfLine
                       <*> readP (many1 digit))
     (\(pkA, pkB) -> findSymmetric p (findSecret g p pkA) pkB)
-    undefined
+    fst -- there's no part 2
     where
         g = 7        -- element
         p = 20201227 -- prime
