@@ -28,7 +28,6 @@ dependencies:
 
 data-files:
     - input/day*.txt
-    - scripts/*.sh
 
 library:
     source-dirs: src
