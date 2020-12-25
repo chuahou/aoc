@@ -86,7 +86,8 @@ library
   default-extensions: BangPatterns GADTs LambdaCase TupleSections TypeOperators
   ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   build-depends:
-      array >=0.5.4.0 && <0.6
+      arithmoi >=0.10.0.0 && <0.11
+    , array >=0.5.4.0 && <0.6
     , base >=4.13 && <5
     , containers >=0.6.2.1 && <0.7
     , delude >=0.1.0.2 && <0.2
