@@ -33,7 +33,6 @@ data-files:
 library:
     source-dirs: src
     dependencies:
-        - arithmoi             ^>= 0.10.0.0
         - array                ^>= 0.5.4.0
         - containers           ^>= 0.6.2.1
         - parsec               ^>= 3.1.14.0

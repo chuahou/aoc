@@ -1,35 +1,47 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2020 Chua Hou
---
--- I was unfamiliar with 'DataKinds', 'KnownNats' etc. so I have taken reference
--- from https://github.com/glguy/advent2020/blob/master/execs/Day25.hs.
-
-{-# LANGUAGE DataKinds #-}
 
 module AOC.Days.Day25 (solution) where
 
 import           AOC.Parsec
 import           AOC.Solution
 
-import           Math.NumberTheory.Moduli
-import           Math.NumberTheory.Moduli.Singleton
+import qualified Data.IntMap  as IntMap
 
-type P = 20201227
+dh :: Int -> Int -> Int -> Int -> Maybe Int
+dh g p pkA pkB = powMod pkB <$> skA
+    where
+        skA = discreteLogarithm pkA
 
-dh :: Int -> Int -> Int -> Maybe Int
-dh g pkA pkB = do
-    { cg <- cyclicGroup :: Maybe (CyclicGroup Integer P)
-    ; rt <- isPrimitiveRoot cg (fromIntegral g :: Mod P)
-    ; x  <- isMultElement (fromIntegral pkA :: Mod P)
-    ; let skA = discreteLogarithm cg rt x
-    ; pure . fromInteger . getVal $ powMod (fromIntegral pkB :: Mod P) skA
-    }
+        opToMod :: (Integer -> Integer -> Integer) -> Int -> Int -> Int
+        opToMod op x y = fromInteger
+                       $ (toInteger x `op` toInteger y) `mod` toInteger p
+
+        powMod :: Int -> Int -> Int
+        powMod = opToMod (^)
+
+        mulMod :: Int -> Int -> Int
+        mulMod = opToMod (*)
+
+        discreteLogarithm :: Int -> Maybe Int
+        discreteLogarithm y = gMulInv >>= \inv -> Just (go inv y 0)
+            where
+                m    = floor ((sqrt . fromIntegral $ p) :: Float)
+                memo = IntMap.fromList
+                     . flip zip [0..] . take m $ iterate (mulMod g) 1
+                gMulInv
+                    | gcd g p == 1 = Just $ (g `powMod` (p - 2)) `powMod` m
+                    | otherwise    = Nothing
+                go inv y' i = case memo IntMap.!? y' of
+                                Just j  -> i * m + j
+                                Nothing -> go inv (y' `mulMod` inv) (i + 1)
 
 solution :: (Int, Int) :=> Maybe Int
 solution = simpleSolution
     (fromParsec $ (,) <$> readP (many1 digit) <* endOfLine
                       <*> readP (many1 digit))
-    (uncurry $ dh g)
+    (uncurry $ dh g p)
     (const Nothing) -- there's no part 2
     where
         g = 7        -- element
+        p = 20201227 -- prime
