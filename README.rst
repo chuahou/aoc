@@ -1,17 +1,15 @@
 ###################
-Advent of Code 2020
+Advent of Code ????
 ###################
 
 |License: MIT| |Build status|
 
-https://adventofcode.com/2020
+https://adventofcode.com/????
 
 You can find individual days in `AOC.Days.Day* <src/AOC/Days/>`_ .
 
-Day 7 has not been migrated from the old format in ``old/`` due to
-ongoing
-`issues <https://stackoverflow.com/questions/65285789/cabal-tries-to-build-unknown-package-when-building-with-alex-happy-in-nix-shell>`_
-with building with alex/happy in nix-shell.
+This is the template. To work on a new year, branch off from this branch
+and replace all occurrences of ``????`` with the correct year.
 
 .. |License: MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
 	:target: https://opensource.org/licenses/MIT
