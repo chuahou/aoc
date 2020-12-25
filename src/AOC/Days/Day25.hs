@@ -18,7 +18,10 @@ dh g p pkA pkB = powMod pkB <$> skA
                        $ (toInteger x `op` toInteger y) `mod` toInteger p
 
         powMod :: Int -> Int -> Int
-        powMod = opToMod (^)
+        (!x) `powMod` 1 = x
+        (!x) `powMod` n = case n `divMod` 2 of
+                            (n', 0) -> opToMod (^) x 2 `powMod` n'
+                            (n', _) -> x `mulMod` (opToMod (^) x 2 `powMod` n')
 
         mulMod :: Int -> Int -> Int
         mulMod = opToMod (*)
