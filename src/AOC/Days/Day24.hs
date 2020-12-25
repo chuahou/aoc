@@ -19,7 +19,7 @@ import qualified Data.Set           as Set
   O - O - O - O : (0, 1) (1, 1) (2, 1) (3, 1)
    \ / \ / \ /
     O - O - O   : (0, 0) (1, 0) (2, 0)
-    The x axis grows to the east and the y axis grows to the northeast.
+    The x axis grows to the east and the y axis grows to the northwest.
 -}
 type Hex   = Set (Int, Int)
 type Instr = (Int, Int)
