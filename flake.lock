@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "delude": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1608626377,
+        "narHash": "sha256-+yTAUd3TOKpVqfrBqyd1tjf2AsmTRboNhxQBKyqhrEI=",
+        "owner": "chuahou",
+        "repo": "delude",
+        "rev": "a00d1d9ed083b3476b021758ef0a51cd44e401cb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chuahou",
+        "ref": "v0.1.0.4",
+        "repo": "delude",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1635350005,
+        "narHash": "sha256-tAMJnUwfaDEB2aa31jGcu7R7bzGELM9noc91L2PbVjg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "1c1f5649bb9c1b0d98637c8c365228f57126f361",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixos-20.09",
+        "type": "indirect"
+      }
+    },
+    "root": {
+      "inputs": {
+        "delude": "delude",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
