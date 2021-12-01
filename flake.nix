@@ -3,8 +3,11 @@
 
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-20.09";
-    delude = { url = "github:chuahou/delude/v0.1.0.4"; flake= false; };
+    nixpkgs.url = "nixpkgs/nixos-21.11";
+    delude = {
+      url = "github:chuahou/delude/v0.1.0.5";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ nixpkgs, ... }:
@@ -15,7 +18,7 @@
       overlays = [ (self: super: {
         haskellPackages = super.haskellPackages.override {
           overrides = self: super: {
-            delude = super.callPackage inputs.delude {};
+            delude = inputs.delude.defaultPackage.${system};
           };
         };
       }) ];
@@ -29,6 +32,7 @@
       (pkgs.haskell.lib.overrideCabal defaultPackage.${system} (old: {
         buildTools = (old.buildTools or []) ++ (with pkgs.haskellPackages; [
           cabal-install
+          haskell-language-server
         ]);
       })).env;
   };

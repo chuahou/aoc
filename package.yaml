@@ -23,7 +23,7 @@ dependencies:
       version: ">= 4.13 && < 5"
       mixin:   hiding (Prelude)
     - name:    delude
-      version: "^>= 0.1.0.2"
+      version: "^>= 0.1.0.5"
       mixin:   (Delude as Prelude)
 
 data-files:
@@ -33,12 +33,12 @@ library:
     source-dirs: src
     dependencies:
         - array                ^>= 0.5.4.0
-        - containers           ^>= 0.6.2.1
+        - containers           ^>= 0.6.5.1
         - parsec               ^>= 3.1.14.0
-        - process              ^>= 1.6.9.0
-        - template-haskell     ^>= 2.15.0.0
-        - unordered-containers ^>= 0.2.10.0
-        - vector               ^>= 0.12.1.2
+        - process              ^>= 1.6.13.2
+        - template-haskell     ^>= 2.16.0.0
+        - unordered-containers ^>= 0.2.14.0
+        - vector               ^>= 0.12.3.1
 
 executable:
     main:         Main.hs
