@@ -1,5 +1,5 @@
 -- SPDX-License-Identifier: MIT
--- Copyright (c) 2020 Chua Hou
+-- Copyright (c) 2021 Chua Hou
 
 module AOC.Days.Day09 (solution) where
 
