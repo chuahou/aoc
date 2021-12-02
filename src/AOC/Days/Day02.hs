@@ -22,5 +22,7 @@ instructionP = do
 solution :: [Instruction] :=> Int
 solution = simpleSolution
     (fromParsec $ sepEndBy instructionP (char '\n'))
-    (uncurry (*) . foldl' (\(x1, y1) (x2, y2) -> (x1 + x2, y1 + y2)) (0, 0))
-    undefined -- part2
+    (uncurry (*) . foldl' (\(x, y) (dx, dy) -> (x + dx, y + dy)) (0, 0))
+    (uncurry (*) . fst . foldl' move ((0, 0), 0))
+    where
+        move ((x, y), aim) (dx, da) = ((x + dx, y + dx * aim), aim + da)
