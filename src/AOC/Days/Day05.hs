@@ -32,17 +32,24 @@ initField vs = A.listArray ((0, 0), size) zeroes
 
 addVent :: Field -> Vent -> Field
 addVent f ((x1, y1), (x2, y2))
-    | x1 == x2  = incr [ (x1, y) | y <- [min y1 y2 .. max y1 y2] ]
-    | y1 == y2  = incr [ (x, y1) | x <- [min x1 x2 .. max x1 x2] ]
+    | x1 == x2 = incr [ (x1, y) | y <- [min y1 y2 .. max y1 y2] ]
+    | y1 == y2 = incr [ (x, y1) | x <- [min x1 x2 .. max x1 x2] ]
+    | abs dx == abs dy = incr diag
     | otherwise = f
     where
         incr cs = f // [ (c, f ! c + 1) | c <- cs ]
+        dx = x1 - x2
+        dy = y1 - y2
+        (x', y') = if x1 < x2 then (x1, y1) else (x2, y2)
+        diag = [ (x' + i, y' + i * (if dx * dy > 0 then 1 else -1))
+               | i <- [0..abs dx]
+               ]
 
-part1 :: [Vent] -> Int
-part1 vs = length . filter (> 1) . A.elems $ foldl' addVent (initField vs) vs
+solve :: [Vent] -> Int
+solve vs = length . filter (> 1) . A.elems $ foldl' addVent (initField vs) vs
 
 solution :: [Vent] :=> Int
 solution = simpleSolution
     (fromParsec parser)
-    part1
-    undefined -- part2
+    (solve . filter (\((x1, y1), (x2, y2)) -> x1 == x2 || y1 == y2))
+    solve
