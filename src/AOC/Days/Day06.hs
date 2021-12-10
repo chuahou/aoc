@@ -32,4 +32,4 @@ solution :: Counts :=> Int
 solution = simpleSolution
     (fromParsec parser)
     (sumCounts . (!! 80) . iterate step)
-    undefined -- part2
+    (sumCounts . (!! 256) . iterate step)
