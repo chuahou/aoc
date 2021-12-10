@@ -40,10 +40,28 @@ part1 g@(n:_, _) = do
     g'@(_, bs) <- step g
     case filter won bs of
       []    -> part1 g'
-      (b:_) -> Just . (* n) . sum . filter (> 0) . concat $ b
+      (b:_) -> Just . calculateSoln n $ b
+
+part2 :: Game -> Maybe Int
+part2 ([], _) = Nothing
+part2 g = do
+    g'@(ns, bs) <- step g
+    case filter (not . won) bs of
+      [b] -> part2' (ns, [b])
+      _   -> part2 g'
+    where
+        part2' :: Game -> Maybe Int
+        part2' ([], _) = Nothing
+        part2' g'@(n:_, _) = do
+            g''@(_, bs) <- step g'
+            b           <- head bs
+            if won b then Just . calculateSoln n $ b else part2' g''
+
+calculateSoln :: Int -> Board -> Int
+calculateSoln n = (* n) . sum . filter (> 0) . concat
 
 solution :: Game :=> Maybe Int
 solution = simpleSolution
     (fromParsec parser)
     part1
-    undefined -- part2
+    part2
