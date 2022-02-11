@@ -59,6 +59,16 @@ void print_energies(energies_t energies)
 	putchar('\n');
 }
 
+bool all_flashed(energies_t energies)
+{
+	for (size_t i = 0; i < GRID_SIZE_X; i++) {
+		for (size_t j = 0; j < GRID_SIZE_Y; j++) {
+			if (energies[i][j] != 0) return false;
+		}
+	}
+	return true;
+}
+
 void day11(char *input)
 {
 	energies_t energies;
@@ -69,7 +79,16 @@ void day11(char *input)
 		assert(input[i * 11 + 10] == '\n', "Invalid input");
 	}
 
+	energies_t energies_copy;
+	memcpy(&energies_copy, &energies, sizeof(energies));
 	uint64_t count = 0;
-	for (int i = 0; i < 100; i++) step(energies, &count);
+	for (int i = 0; i < 100; i++) step(energies_copy, &count);
 	printf("%lu\n", count);
+
+	uint64_t i = 0;
+	while (1) {
+		if (all_flashed(energies)) break;
+		step(energies, &count); i++;
+	}
+	printf("%lu\n", i);
 }
