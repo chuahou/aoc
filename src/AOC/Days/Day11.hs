@@ -4,9 +4,9 @@
 module AOC.Days.Day11 (solution) where
 
 import           AOC.Solution
+import           Foreign.C.String (CString)
 
-solution :: a :=> b
-solution = undefined -- simpleSolution
-    undefined -- parse
-    undefined -- part1
-    undefined -- part2
+foreign import ccall "day11" c_day11 :: CString -> IO ()
+
+solution :: () :=> ()
+solution = ForeignC c_day11

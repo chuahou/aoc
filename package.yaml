@@ -31,6 +31,7 @@ data-files:
 
 library:
     source-dirs: src
+    c-sources:   src/**/*.c
     dependencies:
         - array                ^>= 0.5.4.0
         - containers           ^>= 0.6.5.1

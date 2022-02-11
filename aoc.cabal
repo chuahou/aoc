@@ -88,6 +88,8 @@ library
       TupleSections
       TypeOperators
   ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  c-sources:
+      src/AOC/Days/Day11.c
   build-depends:
       array >=0.5.4.0 && <0.6
     , base >=4.13 && <5
